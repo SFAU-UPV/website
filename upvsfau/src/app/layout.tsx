@@ -6,4 +6,4 @@ import "./globals.css";
 
 export const metadata: Metadata = { title: { default: `${siteConfig.shortName} | ${siteConfig.institution}`, template: `%s | ${siteConfig.shortName}` }, description: siteConfig.description };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) { return <html lang="en"><body><SiteHeader /><main>{children}</main><SiteFooter /></body></html>; }
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) { return <html lang="en"><body><SiteHeader /><main id="main-content">{children}</main><SiteFooter /></body></html>; }
