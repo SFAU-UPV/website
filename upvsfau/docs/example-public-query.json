@@ -1,0 +1,29 @@
+{
+  "programs": [
+    {
+      "id": "verified-db-uuid",
+      "slug": "sample-verified-program",
+      "name": "Sample Verified Program",
+      "summary": "Sanitized example only.",
+      "publication_status": "published",
+      "application_cycles": [
+        {
+          "academic_year": "2026-2027",
+          "verified_open_at": "2026-06-01T00:00:00+08:00",
+          "close_at": "2026-07-15T23:59:59+08:00",
+          "link_type": "official-portal",
+          "external_url": "https://official.example/apply",
+          "verification_state": "verified"
+        }
+      ]
+    }
+  ],
+  "excluded_from_public_payload": [
+    "verification_metadata",
+    "admin_profiles",
+    "audit_logs",
+    "service_role_credentials",
+    "draft and archived programs",
+    "unapproved application links"
+  ]
+}
