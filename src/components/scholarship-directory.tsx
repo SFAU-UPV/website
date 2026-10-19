@@ -12,16 +12,26 @@ const pageSize = 6;
 const statuses: ApplicationAvailability[] = ["open", "upcoming", "closed", "suspended", "unverified"];
 
 export function ScholarshipDirectory({ programs }: { programs: Program[] }) {
-  const [category, setCategory] = useState(() => typeof window === "undefined" ? "all" : new URLSearchParams(window.location.search).get("category") ?? "all");
-  const [query, setQuery] = useState(() => typeof window === "undefined" ? "" : new URLSearchParams(window.location.search).get("q") ?? "");
-  const [degree, setDegree] = useState(() => typeof window === "undefined" ? "all" : new URLSearchParams(window.location.search).get("degree") ?? "all");
-  const [status, setStatus] = useState(() => typeof window === "undefined" ? "all" : new URLSearchParams(window.location.search).get("status") ?? "all");
-  const [sort, setSort] = useState<SortMode>(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("sort") === "deadline" ? "deadline" : "alpha");
+  const [category, setCategory] = useState("all");
+  const [query, setQuery] = useState("");
+  const [degree, setDegree] = useState("all");
+  const [status, setStatus] = useState("all");
+  const [sort, setSort] = useState<SortMode>("alpha");
   const [page, setPage] = useState(1);
   const [today, setToday] = useState(FIXTURE_NOW);
+  const [hydrated, setHydrated] = useState(false);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setCategory(params.get("category") ?? "all");
+    setQuery(params.get("q") ?? "");
+    setDegree(params.get("degree") ?? "all");
+    setStatus(params.get("status") ?? "all");
+    setSort(params.get("sort") === "deadline" ? "deadline" : "alpha");
+    setHydrated(true);
+  }, []);
   useEffect(() => { const timer = window.setTimeout(() => setToday(new Date()), 0); return () => window.clearTimeout(timer); }, []);
-  useEffect(() => { const params = new URLSearchParams(); if (category !== "all") params.set("category", category); if (query) params.set("q", query); if (degree !== "all") params.set("degree", degree); if (status !== "all") params.set("status", status); if (sort !== "alpha") params.set("sort", sort); window.history.replaceState(null, "", `${window.location.pathname}${params.size ? `?${params}` : ""}`); }, [category, query, degree, status, sort]);
+  useEffect(() => { if (!hydrated) return; const params = new URLSearchParams(); if (category !== "all") params.set("category", category); if (query) params.set("q", query); if (degree !== "all") params.set("degree", degree); if (status !== "all") params.set("status", status); if (sort !== "alpha") params.set("sort", sort); window.history.replaceState(null, "", `${window.location.pathname}${params.size ? `?${params}` : ""}`); }, [category, query, degree, status, sort, hydrated]);
 
   const degrees = useMemo(() => Array.from(new Set(programs.flatMap((program) => program.degreePrograms ?? []))).sort(), [programs]);
   const filtered = useMemo(() => programs.filter((program) => {
