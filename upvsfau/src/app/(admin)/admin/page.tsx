@@ -1,1 +1,0 @@
-export default function AdminPage() { return <section className="section"><div className="container"><p className="eyebrow">Admin foundation</p><h1>Administration workspace</h1><p className="card">Secure dashboard workflows are reserved for the next phase. This route exists to establish the protected route boundary.</p></div></section>; }

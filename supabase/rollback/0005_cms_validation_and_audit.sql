@@ -1,0 +1,13 @@
+drop index if exists audit_logs_entity_created_idx;
+drop index if exists announcements_admin_listing_idx;
+drop index if exists programs_admin_listing_idx;
+alter table announcements drop constraint if exists announcements_title_length_check;
+alter table application_cycles drop constraint if exists application_cycles_dates_check;
+alter table application_cycles drop constraint if exists application_cycles_url_protocol_check;
+alter table programs drop constraint if exists programs_summary_length_check;
+alter table programs drop constraint if exists programs_slug_format_check;
+alter table programs drop constraint if exists programs_image_url_protocol_check;
+alter table programs drop column if exists document_urls;
+alter table programs drop column if exists image_url;
+drop trigger if exists announcements_touch_updated_at on announcements;
+drop trigger if exists programs_touch_updated_at on programs;
