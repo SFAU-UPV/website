@@ -5,9 +5,9 @@ import { canApply, resolveApplicationAvailability } from "../types/domain.ts";
 const base = { id: "p", programId: "p", startsOn: "2025-01-02", endsOn: "2025-01-10", declaredAvailability: "open", verificationStatus: "verified", externalApplicationUrl: "https://official.example/app" };
 const atStart = new Date("2025-01-01T16:00:00Z");
 
-test("resolver handles absent and unverified cycles conservatively", () => {
+test("resolver requires a usable link and application window", () => {
   assert.equal(resolveApplicationAvailability(undefined, atStart), "unverified");
-  assert.equal(resolveApplicationAvailability({ ...base, verificationStatus: "unverified" }, atStart), "unverified");
+  assert.equal(resolveApplicationAvailability({ ...base, verificationStatus: "unverified" }, atStart), "open");
   assert.equal(resolveApplicationAvailability({ ...base, externalApplicationUrl: "http://unsafe.example" }, atStart), "unverified");
   assert.equal(resolveApplicationAvailability({ ...base, externalApplicationUrl: undefined }, atStart), "unverified");
   assert.equal(resolveApplicationAvailability({ ...base, startsOn: null, endsOn: null }, atStart), "unverified");
