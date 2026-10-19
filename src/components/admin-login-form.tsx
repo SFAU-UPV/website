@@ -3,4 +3,57 @@
 import { useState } from "react";
 import { authClient } from "@/src/lib/auth/client";
 
-export function AdminLoginForm() { const [email, setEmail] = useState(""); const [password, setPassword] = useState(""); const [error, setError] = useState(""); const [busy, setBusy] = useState(false); async function submit(event: React.FormEvent<HTMLFormElement>) { event.preventDefault(); setBusy(true); setError(""); const result = await authClient.signIn.email({ email, password }); if (result.error) setError(result.error.message ?? "Sign-in failed."); else window.location.href = "/admin"; setBusy(false); } return <><form className="admin-form login-form" onSubmit={submit}><label><span>Email address</span><input required type="email" autoComplete="email" placeholder="name@up.edu.ph" value={email} onChange={(event) => setEmail(event.target.value)} /></label><label><span>Password</span><input required type="password" autoComplete="current-password" placeholder="Enter your password" value={password} onChange={(event) => setPassword(event.target.value)} /></label>{error ? <p className="admin-error" role="alert">{error}</p> : null}<button className="button button-primary login-submit" disabled={busy} type="submit">{busy ? "Signing in..." : "Sign in to workspace"}</button></form><p className="admin-auth-note"><a href="/admin/setup">Create the first admin account</a></p></>; }
+export function AdminLoginForm() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusy(true);
+    setError("");
+    const result = await authClient.signIn.email({ email, password });
+    if (result.error) setError(result.error.message ?? "Sign-in failed.");
+    else window.location.href = "/admin";
+    setBusy(false);
+  }
+  return (
+    <>
+      <form className="admin-form login-form" onSubmit={submit}>
+        <label>
+          <span>Email address</span>
+          <input
+            required
+            type="email"
+            autoComplete="email"
+            placeholder="name@up.edu.ph"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+          />
+        </label>
+        <label>
+          <span>Password</span>
+          <input
+            required
+            type="password"
+            autoComplete="current-password"
+            placeholder="Enter your password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
+        </label>
+        {error ? (
+          <p className="admin-error" role="alert">
+            {error}
+          </p>
+        ) : null}
+        <button className="button button-primary login-submit" disabled={busy} type="submit">
+          {busy ? "Signing in..." : "Sign in to workspace"}
+        </button>
+      </form>
+      <p className="admin-auth-note">
+        <a href="/admin/setup">Create the first admin account</a>
+      </p>
+    </>
+  );
+}

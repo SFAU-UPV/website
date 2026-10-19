@@ -30,8 +30,16 @@ export function ServicesMenu() {
     };
   }, []);
 
-  return <details ref={detailsRef} className="services-menu">
-    <summary ref={summaryRef}>Services</summary>
-    <div className="services-dropdown">{services.map((service) => <Link href={`/services/${service.slug}`} key={service.slug}>{service.name}</Link>)}</div>
-  </details>;
+  return (
+    <details ref={detailsRef} className="services-menu">
+      <summary ref={summaryRef}>Services</summary>
+      <div className="services-dropdown">
+        {services.map((service) => (
+          <Link href={`/services/${service.slug}`} key={service.slug}>
+            {service.name}
+          </Link>
+        ))}
+      </div>
+    </details>
+  );
 }

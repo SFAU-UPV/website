@@ -27,10 +27,13 @@ export function ServiceCarousel() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
-  useEffect(() => () => {
-    if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current);
-    if (loopResetTimerRef.current !== null) window.clearTimeout(loopResetTimerRef.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current);
+      if (loopResetTimerRef.current !== null) window.clearTimeout(loopResetTimerRef.current);
+    },
+    [],
+  );
 
   const getCardStep = useCallback(() => {
     const track = trackRef.current;
@@ -48,47 +51,61 @@ export function ServiceCarousel() {
     return () => window.cancelAnimationFrame(frame);
   }, [getCardStep]);
 
-  const scrollToPosition = useCallback((position: number, behavior: ScrollBehavior = "smooth") => {
-    const details = getCardStep();
-    if (!details) return;
-    const isForwardBoundary = position >= middleStart * 2;
-    const isBackwardBoundary = position < middleStart;
-    let normalizedPosition = position;
-    while (normalizedPosition >= middleStart * 2) normalizedPosition -= services.length;
-    while (normalizedPosition < middleStart) normalizedPosition += services.length;
-    const nextIndex = (normalizedPosition - middleStart) % services.length;
-    lastIndexRef.current = nextIndex;
-    setActiveIndex(nextIndex);
-    ignoreScrollUntilRef.current = behavior === "smooth" ? performance.now() + 500 : 0;
+  const scrollToPosition = useCallback(
+    (position: number, behavior: ScrollBehavior = "smooth") => {
+      const details = getCardStep();
+      if (!details) return;
+      const isForwardBoundary = position >= middleStart * 2;
+      const isBackwardBoundary = position < middleStart;
+      let normalizedPosition = position;
+      while (normalizedPosition >= middleStart * 2) normalizedPosition -= services.length;
+      while (normalizedPosition < middleStart) normalizedPosition += services.length;
+      const nextIndex = (normalizedPosition - middleStart) % services.length;
+      lastIndexRef.current = nextIndex;
+      setActiveIndex(nextIndex);
+      ignoreScrollUntilRef.current = behavior === "smooth" ? performance.now() + 500 : 0;
 
-    if (isForwardBoundary || isBackwardBoundary) {
-      const physicalPosition = position;
-      positionRef.current = physicalPosition;
-      details.track.scrollTo({ left: physicalPosition * details.step, behavior });
-      if (loopResetTimerRef.current !== null) window.clearTimeout(loopResetTimerRef.current);
-      loopResetTimerRef.current = window.setTimeout(() => {
-        const track = trackRef.current;
-        if (!track) return;
-        const resetPosition = isForwardBoundary ? physicalPosition - services.length : physicalPosition + services.length;
-        track.scrollLeft = resetPosition * details.step;
-        positionRef.current = resetPosition;
-        loopResetTimerRef.current = null;
-      }, behavior === "smooth" ? 700 : 0);
-      return;
-    }
+      if (isForwardBoundary || isBackwardBoundary) {
+        const physicalPosition = position;
+        positionRef.current = physicalPosition;
+        details.track.scrollTo({ left: physicalPosition * details.step, behavior });
+        if (loopResetTimerRef.current !== null) window.clearTimeout(loopResetTimerRef.current);
+        loopResetTimerRef.current = window.setTimeout(
+          () => {
+            const track = trackRef.current;
+            if (!track) return;
+            const resetPosition = isForwardBoundary
+              ? physicalPosition - services.length
+              : physicalPosition + services.length;
+            track.scrollLeft = resetPosition * details.step;
+            positionRef.current = resetPosition;
+            loopResetTimerRef.current = null;
+          },
+          behavior === "smooth" ? 700 : 0,
+        );
+        return;
+      }
 
-    positionRef.current = normalizedPosition;
-    details.track.scrollTo({ left: normalizedPosition * details.step, behavior });
-  }, [getCardStep]);
+      positionRef.current = normalizedPosition;
+      details.track.scrollTo({ left: normalizedPosition * details.step, behavior });
+    },
+    [getCardStep],
+  );
 
-  const scrollToService = useCallback((index: number) => {
-    scrollToPosition(middleStart + index);
-  }, [scrollToPosition]);
+  const scrollToService = useCallback(
+    (index: number) => {
+      scrollToPosition(middleStart + index);
+    },
+    [scrollToPosition],
+  );
 
-  const move = useCallback((step: number) => {
-    if (!getCardStep()) return;
-    scrollToPosition(positionRef.current + step);
-  }, [getCardStep, scrollToPosition]);
+  const move = useCallback(
+    (step: number) => {
+      if (!getCardStep()) return;
+      scrollToPosition(positionRef.current + step);
+    },
+    [getCardStep, scrollToPosition],
+  );
 
   const advanceAutomatically = useCallback(() => {
     move(1);
@@ -110,7 +127,8 @@ export function ServiceCarousel() {
       const rawPosition = Math.round(details.track.scrollLeft / details.step);
       const nextPosition = Math.max(0, Math.min(repeatedServices.length - 1, rawPosition));
       positionRef.current = nextPosition;
-      const nextIndex = ((nextPosition - middleStart) % services.length + services.length) % services.length;
+      const nextIndex =
+        (((nextPosition - middleStart) % services.length) + services.length) % services.length;
       if (nextIndex !== lastIndexRef.current) {
         lastIndexRef.current = nextIndex;
         setActiveIndex(nextIndex);
@@ -118,17 +136,85 @@ export function ServiceCarousel() {
     });
   }
 
-  return <div className="service-carousel" role="region" aria-roledescription="carousel" aria-label="OSA-SFAU services" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocusCapture={() => setPaused(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setPaused(false); }}>
-    <div className="service-carousel-frame">
-      <Button type="button" className="carousel-button" variant="outline" size="sm" onPress={() => move(-1)} aria-label="Previous services"><span aria-hidden="true">←</span></Button>
-      <div ref={trackRef} className="service-track" onScroll={updateActiveIndex} tabIndex={0} aria-label="Scrollable services list">
-        {repeatedServices.map((service, index) => <Card className="service-slide" style={{ backgroundImage: `url("${serviceImages[service.slug]}")` }} role="group" aria-roledescription="slide" aria-label={`${(index % services.length) + 1} of ${services.length}: ${service.name}`} key={`${service.slug}-${index}`}>
-          <div className="service-slide-index">0{(index % services.length) + 1}</div>
-          <div className="service-slide-overlay"><Link className="service-slide-title typography typography--h3 typography--weight-bold" href={service.slug === "scholarships" ? "/services/scholarships" : `/services/${service.slug}`}>{service.name}</Link></div>
-        </Card>)}
+  return (
+    <div
+      className="service-carousel"
+      role="region"
+      aria-roledescription="carousel"
+      aria-label="OSA-SFAU services"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node)) setPaused(false);
+      }}
+    >
+      <div className="service-carousel-frame">
+        <Button
+          type="button"
+          className="carousel-button"
+          variant="outline"
+          size="sm"
+          onPress={() => move(-1)}
+          aria-label="Previous services"
+        >
+          <span aria-hidden="true">←</span>
+        </Button>
+        <div
+          ref={trackRef}
+          className="service-track"
+          onScroll={updateActiveIndex}
+          tabIndex={0}
+          aria-label="Scrollable services list"
+        >
+          {repeatedServices.map((service, index) => (
+            <Card
+              className="service-slide"
+              style={{ backgroundImage: `url("${serviceImages[service.slug]}")` }}
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`${(index % services.length) + 1} of ${services.length}: ${service.name}`}
+              key={`${service.slug}-${index}`}
+            >
+              <div className="service-slide-index">0{(index % services.length) + 1}</div>
+              <div className="service-slide-overlay">
+                <Link
+                  className="service-slide-title typography typography--h3 typography--weight-bold"
+                  href={
+                    service.slug === "scholarships"
+                      ? "/services/scholarships"
+                      : `/services/${service.slug}`
+                  }
+                >
+                  {service.name}
+                </Link>
+              </div>
+            </Card>
+          ))}
+        </div>
+        <Button
+          type="button"
+          className="carousel-button"
+          variant="outline"
+          size="sm"
+          onPress={() => move(1)}
+          aria-label="Next services"
+        >
+          <span aria-hidden="true">→</span>
+        </Button>
       </div>
-      <Button type="button" className="carousel-button" variant="outline" size="sm" onPress={() => move(1)} aria-label="Next services"><span aria-hidden="true">→</span></Button>
+      <div className="carousel-dots" aria-label="Jump to a service">
+        {services.map((service, index) => (
+          <button
+            key={service.slug}
+            type="button"
+            className={`carousel-dot${index === activeIndex ? " active" : ""}`}
+            aria-label={`Scroll to ${service.name}`}
+            aria-pressed={index === activeIndex}
+            onClick={() => scrollToService(index)}
+          />
+        ))}
+      </div>
     </div>
-    <div className="carousel-dots" aria-label="Jump to a service">{services.map((service, index) => <button key={service.slug} type="button" className={`carousel-dot${index === activeIndex ? " active" : ""}`} aria-label={`Scroll to ${service.name}`} aria-pressed={index === activeIndex} onClick={() => scrollToService(index)} />)}</div>
-  </div>;
+  );
 }
