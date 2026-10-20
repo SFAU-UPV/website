@@ -30,7 +30,6 @@ export function AssistanceDirectory({
                   <StatusBadge status="unverified" />
                 </span>
               </span>
-              <Accordion.Indicator />
             </Accordion.Trigger>
           </Accordion.Heading>
           <Accordion.Panel>
@@ -62,10 +61,10 @@ export function AssistanceDirectory({
                   </p>
                 ) : null}
                 <Link
-                  className="button button-secondary"
+                  className="button button-primary"
                   href={`/services/other-financial-assistance/${program.slug}`}
                 >
-                  View full program details
+                  View Details
                 </Link>
               </div>
             </Accordion.Body>

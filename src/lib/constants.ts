@@ -8,7 +8,7 @@ export const siteConfig = {
     email: "sts.visayas@up.edu.ph",
     phone: "513-7019",
     office: "Basement, College Union Building, UP Visayas",
-    hours: "Monday–Friday, 8:00 AM–5:00 PM",
+    hours: "Monday-Friday, 8:00 AM-5:00 PM",
   },
 };
 

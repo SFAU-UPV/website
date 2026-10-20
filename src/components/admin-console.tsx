@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { useActionState } from "react";
-import { Dropdown } from "@heroui/react";
+import { useRouter } from "next/navigation";
+import { AlertDialog, Button, Dropdown } from "@heroui/react";
 import {
   changeAnnouncementStateAction,
   changeProgramStateAction,
@@ -21,6 +22,7 @@ type AdminSnapshot = {
   audits: RecordValue[];
 };
 const initialState: AdminActionState = { ok: false };
+const scholarshipDirectoryOption = "scholarship-directory";
 const value = (row: RecordValue, key: string) => String(row[key] ?? "");
 const nested = (row: RecordValue, key: string) =>
   row[key] && typeof row[key] === "object" ? (row[key] as RecordValue) : {};
@@ -37,33 +39,89 @@ function StateAction({
   nextStatus,
   action,
   label,
+  subject,
 }: {
   id: string;
   nextStatus: string;
   action: (form: FormData) => Promise<AdminActionState>;
   label: string;
+  subject: string;
 }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<AdminActionState | null>(null);
+
+  async function confirmAction() {
+    const form = new FormData();
+    form.set("id", id);
+    form.set("next_status", nextStatus);
+    setBusy(true);
+    try {
+      setResult(await action(form));
+    } catch {
+      setResult({ ok: false, error: "The action could not be completed. Please try again." });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
-    <form
-      action={async (form) => {
-        await action(form);
-      }}
-      onSubmit={(event) => {
-        if (!window.confirm(`Confirm: ${label}?`)) event.preventDefault();
-      }}
-    >
-      <input type="hidden" name="id" value={id} />
-      <input type="hidden" name="next_status" value={nextStatus} />
-      <button className="admin-link-button" type="submit">
+    <AlertDialog isOpen={isOpen} onOpenChange={(open) => {
+      if (busy) return;
+      setIsOpen(open);
+      if (!open) setResult(null);
+    }}>
+      <Button
+        type="button"
+        variant={label === "Archive" ? "danger-soft" : "secondary"}
+        size="sm"
+        className={`admin-action-button admin-action-${label.toLowerCase()}`}
+        onPress={() => setIsOpen(true)}
+      >
         {label}
-      </button>
-    </form>
+      </Button>
+      <AlertDialog.Backdrop>
+        <AlertDialog.Container placement="center" size="sm">
+          <AlertDialog.Dialog>
+            <AlertDialog.Header>
+              <AlertDialog.Heading>{result?.ok ? "Action completed" : `${label} ${subject}?`}</AlertDialog.Heading>
+            </AlertDialog.Header>
+            <AlertDialog.Body>
+              {result ? (
+                <p className={result.ok ? "admin-success" : "admin-error"} role={result.ok ? "status" : "alert"}>
+                  {result.message ?? result.error}
+                </p>
+              ) : (
+                <p>Are you sure you want to {label.toLowerCase()} this {subject}?</p>
+              )}
+            </AlertDialog.Body>
+            <AlertDialog.Footer>
+              <Button type="button" variant="outline" isDisabled={busy} onPress={() => setIsOpen(false)}>
+                {result?.ok ? "Close" : "Cancel"}
+              </Button>
+              {!result?.ok ? (
+                <Button
+                  type="button"
+                  variant={label === "Archive" ? "danger-soft" : "secondary"}
+                  className={`admin-action-button admin-action-${label.toLowerCase()}`}
+                  isDisabled={busy}
+                  onPress={confirmAction}
+                >
+                  {busy ? "Working..." : label}
+                </Button>
+              ) : null}
+            </AlertDialog.Footer>
+          </AlertDialog.Dialog>
+        </AlertDialog.Container>
+      </AlertDialog.Backdrop>
+    </AlertDialog>
   );
 }
 function AdminDropdown({
   label,
   name,
   value: selectedValue,
+  formValue,
   options,
   onChange,
   multiple = false,
@@ -71,6 +129,7 @@ function AdminDropdown({
   label: string;
   name: string;
   value: string;
+  formValue?: string;
   options: { value: string; label: string }[];
   onChange: (value: string) => void;
   multiple?: boolean;
@@ -110,7 +169,7 @@ function AdminDropdown({
           </Dropdown.Menu>
         </Dropdown.Popover>
       </Dropdown>
-      <input type="hidden" name={name} value={selectedValue} />
+      <input type="hidden" name={name} value={formValue ?? selectedValue} />
     </label>
   );
 }
@@ -120,15 +179,20 @@ function ProgramForm({
   services,
   categories,
   onDone,
+  onSaved,
 }: {
   program?: RecordValue;
   services: RecordValue[];
   categories: RecordValue[];
   onDone: () => void;
+  onSaved: (program: RecordValue, message: string) => void;
 }) {
-  const [state, action] = useActionState(saveProgramAction, initialState);
+  const [state, setState] = useState<AdminActionState>(initialState);
+  const [busy, setBusy] = useState(false);
   const [serviceCategory, setServiceCategory] = useState(
-    value(program ?? {}, "service_category_id"),
+    program
+      ? value(program, "service_category_id") || scholarshipDirectoryOption
+      : "",
   );
   const [publicationStatus, setPublicationStatus] = useState(
     value(program ?? {}, "publication_status") || "draft",
@@ -136,11 +200,25 @@ function ProgramForm({
   const [categorySlugs, setCategorySlugs] = useState(
     Array.isArray(program?.category_slugs) ? (program?.category_slugs as string[]).join(", ") : "",
   );
+  const isScholarshipService = (selected: string) =>
+    selected === scholarshipDirectoryOption ||
+    services.some(
+      (service) => value(service, "id") === selected && value(service, "slug") === "scholarships",
+    );
   return (
     <form
       className="admin-form"
       action={async (form) => {
-        await action(form);
+        setBusy(true);
+        try {
+          const result = await saveProgramAction(initialState, form);
+          setState(result);
+          if (result.ok && result.program) onSaved(result.program, result.message ?? "Program saved.");
+        } catch {
+          setState({ ok: false, error: "Program could not be saved. Please try again." });
+        } finally {
+          setBusy(false);
+        }
       }}
     >
       <input type="hidden" name="id" value={value(program ?? {}, "id")} />
@@ -162,9 +240,13 @@ function ProgramForm({
           label="Service"
           name="service_category_id"
           value={serviceCategory}
-          onChange={setServiceCategory}
+          formValue={serviceCategory === scholarshipDirectoryOption ? "" : serviceCategory}
+          onChange={(selected) => {
+            setServiceCategory(selected);
+            if (!isScholarshipService(selected)) setCategorySlugs("");
+          }}
           options={[
-            { value: "", label: "Scholarship directory" },
+            { value: scholarshipDirectoryOption, label: "Scholarship directory" },
             ...services.map((item) => ({ value: value(item, "id"), label: value(item, "name") })),
           ]}
         />
@@ -178,17 +260,19 @@ function ProgramForm({
             { value: "published", label: "Published" },
           ]}
         />
-        <AdminDropdown
-          label="Categories"
-          name="category_slugs"
-          value={categorySlugs}
-          onChange={setCategorySlugs}
-          multiple
-          options={categories.map((item) => ({
-            value: value(item, "slug"),
-            label: value(item, "name"),
-          }))}
-        />
+        {isScholarshipService(serviceCategory) ? (
+          <AdminDropdown
+            label="Categories"
+            name="category_slugs"
+            value={categorySlugs}
+            onChange={setCategorySlugs}
+            multiple
+            options={categories.map((item) => ({
+              value: value(item, "slug"),
+              label: value(item, "name"),
+            }))}
+          />
+        ) : null}
         <label>
           Display priority
           <input
@@ -203,9 +287,8 @@ function ProgramForm({
         Description / overview
         <textarea
           name="description"
-          required
           rows={5}
-          defaultValue={value(program ?? {}, "description") || value(program ?? {}, "summary")}
+          defaultValue={value(program ?? {}, "description")}
         />
       </label>
       <div className="admin-form-grid">
@@ -288,14 +371,14 @@ function ProgramForm({
         Feature on the public home page
       </label>
       <div className="admin-actions">
-        <button className="button button-primary" type="submit">
-          {program ? "Save changes" : "Save draft"}
-        </button>
-        <button
-          className="button button-secondary"
+        <Button variant="primary" type="submit" isDisabled={busy}>
+          {busy ? "Saving..." : program ? "Save changes" : "Save draft"}
+        </Button>
+        <Button
+          variant="outline"
           type="button"
-          disabled={!value(program ?? {}, "id")}
-          onClick={() =>
+          isDisabled={!value(program ?? {}, "id")}
+          onPress={() =>
             window.open(
               `/admin/preview/program?id=${encodeURIComponent(value(program ?? {}, "id"))}`,
               "_blank",
@@ -304,10 +387,10 @@ function ProgramForm({
           }
         >
           Preview
-        </button>
-        <button className="button button-secondary" type="button" onClick={onDone}>
+        </Button>
+        <Button variant="outline" type="button" onPress={onDone}>
           Cancel
-        </button>
+        </Button>
       </div>
       <ActionFeedback state={state} />
     </form>
@@ -375,9 +458,9 @@ function CycleForm({ programs }: { programs: RecordValue[] }) {
         <input name="external_url" type="url" placeholder="https://..." />
       </label>
       <div className="admin-actions">
-        <button className="button button-primary" type="submit">
+        <Button variant="primary" type="submit">
           Create cycle
-        </button>
+        </Button>
       </div>
       <ActionFeedback state={state} />
     </form>
@@ -443,13 +526,13 @@ function AnnouncementForm({
         announcement
       </label>
       <div className="admin-actions">
-        <button className="button button-primary" type="submit">
+        <Button variant="primary" type="submit">
           {announcement ? "Save changes" : "Save announcement"}
-        </button>
+        </Button>
         {onDone ? (
-          <button className="button button-secondary" type="button" onClick={onDone}>
+          <Button variant="outline" type="button" onPress={onDone}>
             Cancel
-          </button>
+          </Button>
         ) : null}
       </div>
       <ActionFeedback state={state} />
@@ -479,8 +562,11 @@ function programApplicationStatus(program: RecordValue) {
 }
 
 export function AdminConsole({ snapshot }: { snapshot: AdminSnapshot }) {
+  const router = useRouter();
   const [tab, setTab] = useState<"programs" | "cycles" | "announcements" | "audit">("programs");
   const [editing, setEditing] = useState<RecordValue | undefined>();
+  const [editorRevision, setEditorRevision] = useState(0);
+  const [editorMessage, setEditorMessage] = useState("");
   const [editingAnnouncement, setEditingAnnouncement] = useState<RecordValue | undefined>();
   const [query, setQuery] = useState("");
   const [publication, setPublication] = useState("all");
@@ -539,9 +625,12 @@ export function AdminConsole({ snapshot }: { snapshot: AdminSnapshot }) {
               <p className="eyebrow">Content inventory</p>
               <h2>Programs</h2>
             </div>
-            <button className="button button-primary" onClick={() => setEditing({})}>
+            <Button variant="primary" onPress={() => {
+              setEditorMessage("");
+              setEditing({});
+            }}>
               Add program
-            </button>
+            </Button>
           </div>
           {editing ? (
             <div
@@ -564,20 +653,29 @@ export function AdminConsole({ snapshot }: { snapshot: AdminSnapshot }) {
                       {value(editing, "id") ? "Edit program" : "New program"}
                     </h3>
                   </div>
-                  <button
-                    className="admin-modal-close"
+                  <Button
+                    variant="ghost"
+                    isIconOnly
                     type="button"
                     aria-label="Close editor"
-                    onClick={() => setEditing(undefined)}
+                    onPress={() => setEditing(undefined)}
                   >
                     ×
-                  </button>
+                  </Button>
                 </div>
+                {editorMessage ? <p className="admin-success" role="status">{editorMessage}</p> : null}
                 <ProgramForm
+                  key={`${value(editing, "id")}:${editorRevision}`}
                   program={value(editing, "id") ? editing : undefined}
                   services={snapshot.services}
                   categories={snapshot.categories}
                   onDone={() => setEditing(undefined)}
+                  onSaved={(savedProgram, message) => {
+                    setEditing(savedProgram);
+                    setEditorRevision((revision) => revision + 1);
+                    setEditorMessage(message);
+                    router.refresh();
+                  }}
                 />
               </section>
             </div>
@@ -637,7 +735,7 @@ export function AdminConsole({ snapshot }: { snapshot: AdminSnapshot }) {
             </select>
           </div>
           <div className="admin-table-wrap">
-            <table className="admin-table">
+            <table className="admin-table admin-program-table">
               <thead>
                 <tr>
                   <th>Name</th>
@@ -653,7 +751,6 @@ export function AdminConsole({ snapshot }: { snapshot: AdminSnapshot }) {
                   <tr key={value(program, "id")}>
                     <td>
                       <strong>{value(program, "name")}</strong>
-                      <small>{value(program, "slug")}</small>
                     </td>
                     <td>
                       {value(nested(program, "service_categories"), "name") ||
@@ -672,15 +769,24 @@ export function AdminConsole({ snapshot }: { snapshot: AdminSnapshot }) {
                     <td>{value(program, "updated_at").slice(0, 10)}</td>
                     <td>
                       <div className="admin-row-actions">
-                        <button className="admin-link-button" onClick={() => setEditing(program)}>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="admin-action-button admin-action-edit"
+                          onPress={() => {
+                            setEditorMessage("");
+                            setEditing(program);
+                          }}
+                        >
                           Edit
-                        </button>
+                        </Button>
                         {value(program, "publication_status") === "archived" ? (
                           <StateAction
                             id={value(program, "id")}
                             nextStatus="draft"
                             action={changeProgramStateAction}
                             label="Restore"
+                            subject="program"
                           />
                         ) : value(program, "publication_status") === "published" ? (
                           <StateAction
@@ -688,6 +794,7 @@ export function AdminConsole({ snapshot }: { snapshot: AdminSnapshot }) {
                             nextStatus="draft"
                             action={changeProgramStateAction}
                             label="Unpublish"
+                            subject="program"
                           />
                         ) : (
                           <StateAction
@@ -695,6 +802,7 @@ export function AdminConsole({ snapshot }: { snapshot: AdminSnapshot }) {
                             nextStatus="published"
                             action={changeProgramStateAction}
                             label="Publish"
+                            subject="program"
                           />
                         )}{" "}
                         {value(program, "publication_status") !== "archived" ? (
@@ -703,6 +811,7 @@ export function AdminConsole({ snapshot }: { snapshot: AdminSnapshot }) {
                             nextStatus="archived"
                             action={changeProgramStateAction}
                             label="Archive"
+                            subject="program"
                           />
                         ) : null}
                       </div>
@@ -714,15 +823,15 @@ export function AdminConsole({ snapshot }: { snapshot: AdminSnapshot }) {
           </div>
           <div className="admin-pagination">
             <span>{filteredPrograms.length} result(s)</span>
-            <button disabled={page <= 1} onClick={() => setPage(page - 1)}>
+            <Button variant="outline" size="sm" isDisabled={page <= 1} onPress={() => setPage(page - 1)}>
               Previous
-            </button>
+            </Button>
             <span>
               Page {page} of {pages}
             </span>
-            <button disabled={page >= pages} onClick={() => setPage(page + 1)}>
+            <Button variant="outline" size="sm" isDisabled={page >= pages} onPress={() => setPage(page + 1)}>
               Next
-            </button>
+            </Button>
           </div>
         </section>
       ) : null}
@@ -802,18 +911,21 @@ export function AdminConsole({ snapshot }: { snapshot: AdminSnapshot }) {
                 {value(announcement, "publication_status")}
               </span>
               <div className="admin-row-actions">
-                <button
-                  className="admin-link-button"
-                  onClick={() => setEditingAnnouncement(announcement)}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="admin-action-button admin-action-edit"
+                  onPress={() => setEditingAnnouncement(announcement)}
                 >
                   Edit
-                </button>
+                </Button>
                 {value(announcement, "publication_status") === "archived" ? (
                   <StateAction
                     id={value(announcement, "id")}
                     nextStatus="draft"
                     action={changeAnnouncementStateAction}
                     label="Restore"
+                    subject="announcement"
                   />
                 ) : value(announcement, "publication_status") === "published" ? (
                   <StateAction
@@ -821,6 +933,7 @@ export function AdminConsole({ snapshot }: { snapshot: AdminSnapshot }) {
                     nextStatus="draft"
                     action={changeAnnouncementStateAction}
                     label="Unpublish"
+                    subject="announcement"
                   />
                 ) : (
                   <StateAction
@@ -828,6 +941,7 @@ export function AdminConsole({ snapshot }: { snapshot: AdminSnapshot }) {
                     nextStatus="published"
                     action={changeAnnouncementStateAction}
                     label="Publish"
+                    subject="announcement"
                   />
                 )}{" "}
                 {value(announcement, "publication_status") !== "archived" ? (
@@ -836,6 +950,7 @@ export function AdminConsole({ snapshot }: { snapshot: AdminSnapshot }) {
                     nextStatus="archived"
                     action={changeAnnouncementStateAction}
                     label="Archive"
+                    subject="announcement"
                   />
                 ) : null}
               </div>

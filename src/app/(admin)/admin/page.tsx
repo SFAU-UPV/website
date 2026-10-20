@@ -1,4 +1,5 @@
 import { AdminConsole } from "@/src/components/admin-console";
+import { Button } from "@heroui/react";
 import { getAdminSnapshot } from "@/src/lib/admin";
 
 export const instant = false;
@@ -16,9 +17,9 @@ export default async function AdminPage() {
               <p>Manage published information separately from application availability.</p>
             </div>
             <form action="/admin/login" method="get">
-              <button className="button button-secondary" type="submit">
+              <Button variant="outline" type="submit">
                 Sign in again
-              </button>
+              </Button>
             </form>
           </div>
           <AdminConsole snapshot={snapshot} />

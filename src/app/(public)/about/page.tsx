@@ -46,7 +46,7 @@ export default function AboutPage() {
               </p>
             </div>
             <div className="prose-section" id="mandate">
-              <h2>Mandate and functions</h2>
+              <h2>Mandate and Functions</h2>
               <p>
                 The unit implements programs such as the Student Learning Assistance System (SLAS),
                 socialized tuition assessment, and the Student Assistantship Program. It evaluates

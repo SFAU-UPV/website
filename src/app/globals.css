@@ -305,7 +305,7 @@ select:focus-visible {
   margin-top: 1.75rem;
 }
 .button {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid transparent;
@@ -319,14 +319,49 @@ select:focus-visible {
 }
 .button-primary:hover {
   background: var(--maroon-900);
+  color: white;
 }
 .button-secondary {
-  border-color: currentColor;
-  color: var(--maroon-900);
-  background: transparent;
+  border-color: var(--maroon-700);
+  color: white;
+  background: var(--maroon-700);
+}
+.button-secondary:hover {
+  border-color: var(--maroon-900);
+  color: white;
+  background: var(--maroon-900);
 }
 .hero .button-secondary {
   color: white;
+}
+.button--outline {
+  border-color: var(--maroon-700);
+  color: white;
+  --button-bg: var(--maroon-700);
+  --button-bg-hover: var(--maroon-900);
+  --button-bg-pressed: var(--maroon-900);
+  --button-fg: white;
+}
+.button--outline:hover,
+.button--outline:focus-visible,
+.button--outline[data-pressed="true"] {
+  color: white;
+}
+.hero .hero-button {
+  flex: 0 0 14rem;
+  width: 14rem;
+  --button-bg: var(--maroon-700);
+  --button-bg-hover: var(--maroon-900);
+  --button-bg-pressed: var(--maroon-900);
+  --button-fg: white;
+}
+.hero .hero-about-button {
+  --button-bg: #b8860b;
+  --button-bg-hover: var(--gold);
+  --button-bg-pressed: var(--gold);
+}
+.hero .button-row {
+  width: fit-content;
 }
 .section {
   padding: 4rem 0;
@@ -553,8 +588,6 @@ select:focus-visible {
   grid-template-columns: 1fr 1.5fr auto;
   align-items: center;
   gap: 2rem;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
 }
 .mission-panel h2 {
   margin: 0.25rem 0;
@@ -652,8 +685,7 @@ select:focus-visible {
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
-.directory-filters .input,
-.directory-filters .select {
+.directory-filters .input {
   min-height: 2.9rem;
   border-color: #c9bdae;
   border-radius: 0.65rem;
@@ -663,8 +695,7 @@ select:focus-visible {
     border-color 0.2s ease,
     box-shadow 0.2s ease;
 }
-.directory-filters .input:focus,
-.directory-filters .select:focus {
+.directory-filters .input:focus {
   border-color: var(--maroon-700);
   outline: 0;
   box-shadow: 0 0 0 3px rgba(139, 18, 28, 0.13);
@@ -673,36 +704,26 @@ select:focus-visible {
   position: relative;
   width: 200px;
 }
-.directory-filters .select {
-  appearance: none;
-  cursor: pointer;
-  padding-right: 2.4rem;
-}
-.directory-filters .filter-select::after {
-  position: absolute;
-  right: 0.9rem;
-  bottom: 0.95rem;
-  width: 0.5rem;
-  height: 0.5rem;
-  border-right: 2px solid var(--maroon-700);
-  border-bottom: 2px solid var(--maroon-700);
-  content: "";
-  pointer-events: none;
-  transform: rotate(45deg) translateY(-2px);
+.directory-filters .filter-control {
+  width: 100%;
 }
 .directory-filters .filter-search {
   flex: 1 1 280px;
 }
 .directory-filters .clear-filters {
-  min-height: 2.9rem;
+  min-width: 8.5rem;
+  min-height: 2.75rem;
+  align-self: end;
   border-color: var(--maroon-700);
   border-radius: 0.65rem;
-  color: var(--maroon-700);
+  background: var(--maroon-700);
+  color: white;
   font-weight: 800;
   white-space: nowrap;
 }
 .directory-filters .clear-filters:hover {
-  background: var(--maroon-700);
+  background: var(--maroon-900);
+  border-color: var(--maroon-900);
   color: white;
 }
 .search-form-row > button {
@@ -808,15 +829,17 @@ select:focus-visible {
   gap: 0.45rem;
 }
 .carousel-button {
-  display: inline-grid;
+  display: inline-flex;
   width: 2.5rem;
   height: 2.5rem;
   min-width: 2.5rem;
-  place-items: center;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   border: 1px solid color-mix(in srgb, var(--maroon-700) 55%, transparent);
   border-radius: 0.75rem;
-  background: var(--paper);
-  color: var(--maroon-700);
+  background: var(--maroon-700);
+  color: white;
   cursor: pointer;
   font-size: 1.35rem;
   line-height: 1;
@@ -829,7 +852,8 @@ select:focus-visible {
 }
 .carousel-button:hover,
 .carousel-button:focus-visible {
-  background: var(--maroon-700);
+  background: var(--maroon-900);
+  border-color: var(--maroon-900);
   color: white;
   box-shadow: 0 5px 14px rgba(45, 25, 10, 0.16);
   transform: translateY(-1px);
@@ -1338,8 +1362,14 @@ select:focus-visible {
   color: var(--maroon-900);
 }
 .load-more {
-  display: block;
-  margin: 1.25rem auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  margin-top: 1.25rem;
+  margin-right: auto;
+  margin-left: auto;
+  text-align: center;
 }
 .program-row h2 {
   margin: 0;
@@ -1416,11 +1446,24 @@ select:focus-visible {
     align-self: stretch;
   }
   .directory-tabs {
-    overflow-x: auto;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
+    justify-content: center;
+    overflow: visible;
   }
-  .directory-tabs button {
-    white-space: nowrap;
+  .directory-filters {
+    gap: 0.45rem;
+    padding: 0.85rem;
+  }
+  .directory-filters label {
+    gap: 0.2rem;
+  }
+  .directory-filters label > span {
+    margin-bottom: 0.15rem;
+  }
+  .directory-filters .input,
+  .directory-filters .filter-control .select__trigger,
+  .directory-filters .clear-filters {
+    min-height: 2.6rem;
   }
 }
 
@@ -1455,6 +1498,7 @@ select:focus-visible {
   border-radius: 0.35rem;
 }
 .scholarship-accordions [data-slot="accordion-item"] {
+  position: relative;
   overflow: visible;
   border: 0;
   border-bottom: 1px solid var(--line);
@@ -1531,6 +1575,16 @@ select:focus-visible {
   justify-self: start;
   min-height: 2.4rem;
   padding: 0.55rem 0.8rem;
+}
+.scholarship-accordion-content .button.button-secondary {
+  border-color: var(--maroon-700);
+  background-color: var(--maroon-700);
+  color: white;
+}
+.scholarship-accordion-content .button.button-secondary:hover {
+  border-color: var(--maroon-900);
+  background-color: var(--maroon-900);
+  color: white;
 }
 .service-detail-content {
   width: calc(100% - 8rem);
@@ -2028,6 +2082,43 @@ select:focus-visible {
   flex-wrap: wrap;
   gap: 0.65rem;
 }
+.admin-row-actions {
+  flex-wrap: nowrap;
+  gap: 0.4rem;
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.admin-row-actions .admin-action-button {
+  flex: 0 0 auto;
+  font-weight: 700;
+  padding-inline: 0.65rem;
+}
+.admin-action-button.admin-action-edit {
+  --button-bg: color-mix(in srgb, var(--maroon-700) 12%, var(--paper));
+  --button-bg-hover: color-mix(in srgb, var(--maroon-700) 20%, var(--paper));
+  --button-bg-pressed: color-mix(in srgb, var(--maroon-700) 28%, var(--paper));
+  --button-fg: var(--maroon-900);
+}
+.admin-action-button.admin-action-publish,
+.admin-action-button.admin-action-restore {
+  --button-bg: color-mix(in srgb, var(--green-800) 15%, var(--paper));
+  --button-bg-hover: color-mix(in srgb, var(--green-800) 24%, var(--paper));
+  --button-bg-pressed: color-mix(in srgb, var(--green-800) 32%, var(--paper));
+  --button-fg: var(--green-950);
+}
+.admin-action-button.admin-action-unpublish {
+  --button-bg: var(--gold);
+  --button-bg-hover: color-mix(in srgb, var(--gold) 75%, var(--warning));
+  --button-bg-pressed: color-mix(in srgb, var(--gold) 60%, var(--warning));
+  --button-fg: var(--green-950);
+}
+.admin-action-button.admin-action-archive {
+  --button-bg: var(--maroon-700);
+  --button-bg-hover: var(--maroon-900);
+  --button-bg-pressed: var(--maroon-900);
+  --button-fg: white;
+}
 .admin-filters {
   display: grid;
   grid-template-columns: minmax(240px, 2fr) repeat(4, minmax(145px, 1fr));
@@ -2060,6 +2151,23 @@ select:focus-visible {
   width: 100%;
   border-collapse: collapse;
   min-width: 720px;
+}
+.admin-program-table {
+  min-width: 1200px;
+  table-layout: fixed;
+}
+.admin-program-table th:nth-child(1) { width: 31%; }
+.admin-program-table th:nth-child(2) { width: 13%; }
+.admin-program-table th:nth-child(3) { width: 10%; }
+.admin-program-table th:nth-child(4) { width: 11%; }
+.admin-program-table th:nth-child(5) { width: 10%; }
+.admin-program-table th:nth-child(6) { width: 25%; }
+.admin-program-table td:nth-child(5) {
+  white-space: nowrap;
+}
+.admin-program-table .admin-row-actions {
+  max-width: none;
+  overflow: visible;
 }
 .admin-table th,
 .admin-table td {
@@ -2254,6 +2362,30 @@ select:focus-visible {
 .login-form input::placeholder {
   color: #92908a;
 }
+.admin-password-field {
+  display: grid;
+  gap: 0.35rem;
+}
+.admin-password-field > label {
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+.admin-password-input-wrap {
+  position: relative;
+}
+.admin-password-input-wrap input {
+  width: 100%;
+  padding-right: 4.75rem !important;
+}
+.admin-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.4rem;
+  transform: translateY(-50%);
+  --button-fg: var(--maroon-700);
+  --button-bg-hover: color-mix(in srgb, var(--maroon-700) 10%, transparent);
+}
 .login-submit {
   width: 100%;
   min-height: 2.75rem;
@@ -2271,6 +2403,75 @@ select:focus-visible {
   max-width: 700px;
   color: var(--muted);
   font-size: 1.1rem;
+}
+
+/* Scholarship filters: keep the controls compact and aligned on desktop. */
+.directory-filters {
+  display: grid;
+  grid-template-columns: minmax(230px, 1.55fr) repeat(3, minmax(145px, 1fr)) auto;
+  align-items: end;
+  gap: 1rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.directory-filters .filter-search,
+.directory-filters .filter-select {
+  width: auto;
+  min-width: 0;
+}
+.directory-filters .filter-search {
+  flex: none;
+}
+.directory-filters .filter-control[data-slot="select"] {
+  display: contents;
+  width: 100%;
+}
+.directory-filters .filter-control [data-slot="select-trigger"] {
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1px solid #c9bdae;
+  border-radius: 0.65rem;
+  background: #fffdf9;
+  box-shadow: inset 0 1px 2px rgba(45, 25, 10, 0.04);
+  color: var(--ink);
+}
+.directory-filters .filter-control [data-slot="select-trigger"]:hover,
+.directory-filters .filter-control [data-slot="select-trigger"][data-focus-visible="true"] {
+  border-color: var(--maroon-700);
+  outline: none;
+}
+.directory-filters .filter-control [data-slot="select-indicator"] {
+  color: var(--maroon-700);
+}
+.directory-filters .clear-filters {
+  min-width: 8.5rem;
+  min-height: 2.75rem;
+  align-self: end;
+  color: white !important;
+  --button-fg: white;
+}
+@media (max-width: 1000px) {
+  .directory-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .directory-filters .filter-search {
+    grid-column: 1 / -1;
+  }
+  .directory-filters .clear-filters {
+    width: 100%;
+  }
+}
+@media (max-width: 720px) {
+  .directory-filters {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding: 0;
+  }
+  .directory-filters .filter-search {
+    grid-column: auto;
+  }
 }
 @media (max-width: 1100px) {
   .admin-filters {

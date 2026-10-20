@@ -40,6 +40,7 @@ export function ProgramDetail({
   const cycle = getPrimaryCycle(program);
   const availability = resolveApplicationAvailability(cycle);
   const applyEnabled = canApply(program, cycle);
+  const overview = (program.description ?? program.summary).trim();
   return (
     <>
       <Breadcrumbs items={breadcrumbs} />
@@ -78,10 +79,12 @@ export function ProgramDetail({
                 <span className="availability-action">Application link unavailable</span>
               )}
             </div>
-            <section className="prose-section" id="overview">
-              <h2>Overview</h2>
-              <p>{program.description ?? program.summary}</p>
-            </section>
+            {overview ? (
+              <section className="prose-section" id="overview">
+                <h2>Overview</h2>
+                <p>{overview}</p>
+              </section>
+            ) : null}
             <ListSection id="eligibility" title="Eligibility" items={program.eligibility} />
             <ListSection id="requirements" title="Requirements" items={program.requirements} />
             <ListSection id="benefits" title="Benefits" items={program.benefits} />

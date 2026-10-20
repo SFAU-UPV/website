@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@heroui/react";
+import { AdminPasswordField } from "@/src/components/admin-password-field";
 import { authClient } from "@/src/lib/auth/client";
 
 export function AdminLoginForm() {
@@ -31,25 +33,22 @@ export function AdminLoginForm() {
             onChange={(event) => setEmail(event.target.value)}
           />
         </label>
-        <label>
-          <span>Password</span>
-          <input
-            required
-            type="password"
-            autoComplete="current-password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-        </label>
+        <AdminPasswordField
+          id="admin-login-password"
+          label="Password"
+          value={password}
+          onChange={setPassword}
+          autoComplete="current-password"
+          placeholder="Enter your password"
+        />
         {error ? (
           <p className="admin-error" role="alert">
             {error}
           </p>
         ) : null}
-        <button className="button button-primary login-submit" disabled={busy} type="submit">
+        <Button variant="primary" isDisabled={busy} type="submit" className="login-submit">
           {busy ? "Signing in..." : "Sign in to workspace"}
-        </button>
+        </Button>
       </form>
       <p className="admin-auth-note">
         <a href="/admin/setup">Create the first admin account</a>

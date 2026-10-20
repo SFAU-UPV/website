@@ -27,6 +27,7 @@ export interface Program {
   id: string;
   slug: string;
   name: string;
+  createdAt?: string;
   summary: string;
   description?: string;
   category: ScholarshipCategory;

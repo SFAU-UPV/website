@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { SectionHeading } from "@/src/components/section-heading";
-import { StatusBadge } from "@/src/components/status-badge";
 import { getPublicAnnouncements, getPublicPrograms } from "@/src/lib/content";
-import { getPrimaryCycle, resolveApplicationAvailability } from "@/src/types/domain";
 import { ServiceCarousel } from "@/src/components/service-carousel";
+import { HeroActions } from "@/src/components/hero-actions";
+import { FeaturedOpportunities } from "@/src/components/featured-opportunities";
 
 export const instant = false;
 
@@ -25,14 +25,7 @@ export default async function HomePage() {
           <p className="typography typography--body">
             Explore scholarships, financial assistance, and student support services from OSA-SFAU.
           </p>
-          <div className="button-row">
-            <Link className="button button-primary" href="/services/scholarships">
-              Explore scholarships
-            </Link>
-            <Link className="button button-secondary" href="/about">
-              About OSA-SFAU
-            </Link>
-          </div>
+          <HeroActions />
         </div>
       </section>
       {announcements.length > 0 ? (
@@ -66,28 +59,12 @@ export default async function HomePage() {
             title="Start with the scholarship directory"
             intro="Browse by administering category. Application availability is shown only after SFAU verification."
           />
-          <div className="program-list">
-            {programs
-              .filter((program) => program.featured)
-              .map((program) => (
-                <Link
-                  className="card program-row"
-                  href={`/services/scholarships/${program.slug}`}
-                  key={program.id}
-                >
-                  <div>
-                    <h3>{program.name}</h3>
-                    {program.summary ? <p>{program.summary}</p> : null}
-                  </div>
-                  <div className="program-meta">
-                    <StatusBadge
-                      status={resolveApplicationAvailability(getPrimaryCycle(program))}
-                    />
-                    <span aria-hidden="true">→</span>
-                  </div>
-                </Link>
-              ))}
-          </div>
+          <FeaturedOpportunities
+            programs={programs
+              .filter((program) => program.serviceSlug === "scholarships")
+              .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""))
+              .slice(0, 3)}
+          />
         </div>
       </section>
       <section className="section">

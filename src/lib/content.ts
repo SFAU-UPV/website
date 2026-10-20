@@ -31,6 +31,7 @@ type DbProgram = {
   id: string;
   slug: string;
   name: string;
+  created_at: string | Date;
   summary: string;
   description: string | null;
   publication_status: "draft" | "published" | "archived";
@@ -84,6 +85,7 @@ function mapProgram(row: DbProgram): Program {
     id: row.id,
     slug: row.slug,
     name: row.name,
+    createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
     summary: row.description ?? "",
     description: row.description ?? undefined,
     category: categories[0] ?? "up-administered",
@@ -109,7 +111,7 @@ export async function getPublicPrograms(): Promise<Program[]> {
   if (!isNeonConfigured()) return [];
   try {
     const rows = (await getNeonSql().query(
-      `select p.id, p.slug, p.name, p.summary, p.description, p.publication_status, p.eligibility, p.requirements, p.benefits, p.degree_programs, p.application_process, p.contact, p.official_source_url, sc.slug as service_slug, coalesce(array_agg(distinct sh.slug::text) filter (where sh.slug is not null), '{}') as category_slugs, coalesce(jsonb_agg(distinct jsonb_build_object('id', ac.id, 'program_id', ac.program_id, 'verified_open_at', ac.verified_open_at, 'close_at', ac.close_at, 'external_url', ac.external_url, 'link_type', ac.link_type, 'verification_state', ac.verification_state, 'admin_override', ac.admin_override)) filter (where ac.id is not null), '[]') as application_cycles from programs p left join service_categories sc on sc.id = p.service_category_id left join program_category_links pcl on pcl.program_id = p.id left join scholarship_categories sh on sh.id = pcl.category_id left join application_cycles ac on ac.program_id = p.id and ac.archived_at is null where p.publication_status = 'published' and p.archived_at is null group by p.id, sc.slug order by p.name`,
+      `select p.id, p.slug, p.name, p.created_at, p.summary, p.description, p.publication_status, p.eligibility, p.requirements, p.benefits, p.degree_programs, p.application_process, p.contact, p.official_source_url, sc.slug as service_slug, coalesce(array_agg(distinct sh.slug::text) filter (where sh.slug is not null), '{}') as category_slugs, coalesce(jsonb_agg(distinct jsonb_build_object('id', ac.id, 'program_id', ac.program_id, 'verified_open_at', ac.verified_open_at, 'close_at', ac.close_at, 'external_url', ac.external_url, 'link_type', ac.link_type, 'verification_state', ac.verification_state, 'admin_override', ac.admin_override)) filter (where ac.id is not null), '[]') as application_cycles from programs p left join service_categories sc on sc.id = p.service_category_id left join program_category_links pcl on pcl.program_id = p.id left join scholarship_categories sh on sh.id = pcl.category_id left join application_cycles ac on ac.program_id = p.id and ac.archived_at is null where p.publication_status = 'published' and p.archived_at is null group by p.id, sc.slug order by p.name`,
     )) as unknown as DbProgram[];
     return rows.map(mapProgram);
   } catch (error) {

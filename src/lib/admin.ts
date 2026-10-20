@@ -4,7 +4,12 @@ import { revalidatePath } from "next/cache";
 import { auth, isNeonAuthConfigured } from "@/src/lib/auth/server";
 import { getNeonSql, isNeonConfigured } from "@/src/lib/neon/db";
 
-export type AdminActionState = { ok: boolean; message?: string; error?: string };
+export type AdminActionState = {
+  ok: boolean;
+  message?: string;
+  error?: string;
+  program?: Record<string, unknown>;
+};
 type Row = Record<string, unknown>;
 type Sql = ReturnType<typeof getNeonSql>;
 const emptyState: AdminActionState = { ok: false };
@@ -80,14 +85,15 @@ function programPayload(form: FormData) {
   const name = text(form, "name"),
     slug = text(form, "slug").toLowerCase(),
     description = nullable(sanitize(text(form, "description")));
-  if (!name || !slug || !description) throw new Error("Name, slug, and description are required.");
+  if (!name || !slug) throw new Error("Name and slug are required.");
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug))
     throw new Error("Slug must use lowercase letters, numbers, and hyphens only.");
   return {
     name,
     slug,
     description,
-    summary: description,
+    // The database requires a nonempty, at-most-500-character summary.
+    summary: (description ?? name).slice(0, 500),
     service_category_id: nullable(text(form, "service_category_id")),
     publication_status: ["draft", "published", "archived"].includes(
       text(form, "publication_status"),
@@ -160,7 +166,7 @@ export async function saveProgramAction(
     ];
     if (id)
       rows = await sql.query(
-        "update programs set name=$1,slug=$2,summary=$3,description=$4,service_category_id=$5,publication_status=$6,featured=$7,display_priority=$8,eligibility=$9,requirements=$10,benefits=$11,degree_programs=$12,application_process=$13,official_source_url=$14,image_url=$15,document_urls=$16,updated_at=now(),archived_at=case when $6='archived' then coalesce(archived_at, now()) else null end where id=$17 returning *",
+        "update programs set name=$1,slug=$2,summary=$3,description=$4,service_category_id=$5,publication_status=$6::publication_status,featured=$7,display_priority=$8,eligibility=$9,requirements=$10,benefits=$11,degree_programs=$12,application_process=$13,official_source_url=$14,image_url=$15,document_urls=$16,updated_at=now(),archived_at=case when $6::publication_status='archived' then coalesce(archived_at, now()) else null end where id=$17 returning *",
         [...params, id],
       );
     else
@@ -204,12 +210,24 @@ export async function saveProgramAction(
       null,
       { id: rows[0].id, name: rows[0].name, publication_status: rows[0].publication_status },
     );
+    const updatedProgram = (
+      await sql.query(
+        "select p.*, coalesce(array_agg(distinct sh.slug) filter (where sh.slug is not null), '{}') as category_slugs, coalesce(jsonb_agg(distinct ac) filter (where ac.id is not null), '[]') as application_cycles from programs p left join program_category_links pcl on pcl.program_id=p.id left join scholarship_categories sh on sh.id=pcl.category_id left join application_cycles ac on ac.program_id=p.id and ac.archived_at is null where p.id=$1 group by p.id",
+        [rows[0].id],
+      )
+    )[0];
+    if (!updatedProgram) throw new Error("Saved program could not be reloaded.");
+    revalidatePath("/admin");
     revalidatePath("/");
     revalidatePath("/services");
     revalidatePath("/services/scholarships");
     revalidatePath("/services/other-financial-assistance");
     revalidatePath("/services/student-assistantship");
-    return { ok: true, message: id ? "Program updated." : "Program saved as draft." };
+    return {
+      ok: true,
+      message: id ? "Program updated." : "Program saved as draft.",
+      program: updatedProgram,
+    };
   } catch (error) {
     return {
       ok: false,
@@ -233,7 +251,7 @@ export async function changeProgramStateAction(form: FormData): Promise<AdminAct
     if (!before) throw new Error("Program not found.");
     const after = (
       await sql.query(
-        "update programs set publication_status=$1, archived_at=case when $1='archived' then coalesce(archived_at, now()) else null end, updated_at=now() where id=$2 returning id,name,slug,publication_status,archived_at",
+        "update programs set publication_status=$1::publication_status, archived_at=case when $1::publication_status='archived' then coalesce(archived_at, now()) else null end, updated_at=now() where id=$2 returning id,name,slug,publication_status,archived_at",
         [next, id],
       )
     )[0];
@@ -382,7 +400,7 @@ export async function changeAnnouncementStateAction(form: FormData): Promise<Adm
     if (!before) throw new Error("Announcement not found.");
     const after = (
       await sql.query(
-        "update announcements set publication_status=$1, archived_at=case when $1='archived' then coalesce(archived_at, now()) else null end, published_at=case when $1='published' then coalesce(published_at, now()) else published_at end, updated_at=now() where id=$2 returning id,title,publication_status,archived_at,published_at",
+        "update announcements set publication_status=$1::publication_status, archived_at=case when $1::publication_status='archived' then coalesce(archived_at, now()) else null end, published_at=case when $1::publication_status='published' then coalesce(published_at, now()) else published_at end, updated_at=now() where id=$2 returning id,title,publication_status,archived_at,published_at",
         [next, id],
       )
     )[0];

@@ -13,8 +13,7 @@ import {
   type Program,
 } from "@/src/types/domain";
 import { StatusBadge } from "@/src/components/status-badge";
-import { Button } from "@heroui/react";
-import { Accordion } from "@heroui/react";
+import { Accordion, Button, Input, ListBox, Select } from "@heroui/react";
 
 type SortMode = "alpha" | "deadline";
 const pageSize = 6;
@@ -149,9 +148,9 @@ export function ScholarshipDirectory({ programs }: { programs: Program[] }) {
       </div>
       <fieldset className="filters directory-filters">
         <legend className="sr-only">Filter and sort scholarship programs</legend>
-        <label className="filter-search">
+          <label className="filter-search">
           <span>Search by name</span>
-          <input
+            <Input
             className="input"
             value={query}
             onChange={(event) => chooseQuery(event.target.value)}
@@ -160,51 +159,78 @@ export function ScholarshipDirectory({ programs }: { programs: Program[] }) {
         </label>
         <label className="filter-select">
           <span>Degree program</span>
-          <select
-            className="select"
-            value={degree}
-            onChange={(event) => chooseDegree(event.target.value)}
-          >
-            <option value="all">All degree programs</option>
-            {degrees.map((item) => (
-              <option value={item} key={item}>
-                {item}
-              </option>
-            ))}
-          </select>
+            <Select
+              aria-label="Degree program"
+              className="filter-control"
+              selectedKey={degree}
+              onSelectionChange={(key) => chooseDegree(String(key))}
+            >
+              <Select.Trigger>
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover>
+                <ListBox>
+                  <ListBox.Item id="all">All degree programs</ListBox.Item>
+                  {degrees.map((item) => (
+                    <ListBox.Item id={item} key={item}>
+                      {item}
+                    </ListBox.Item>
+                  ))}
+                </ListBox>
+              </Select.Popover>
+            </Select>
         </label>
         <label className="filter-select">
           <span>Application status</span>
-          <select
-            className="select"
-            value={status}
-            onChange={(event) => chooseStatus(event.target.value)}
-          >
-            <option value="all">All statuses</option>
-            {statuses.map((item) => (
-              <option value={item} key={item}>
-                {item === "unverified"
-                  ? "Check official source"
-                  : item[0].toUpperCase() + item.slice(1)}
-              </option>
-            ))}
-          </select>
+            <Select
+              aria-label="Application status"
+              className="filter-control"
+              selectedKey={status}
+              onSelectionChange={(key) => chooseStatus(String(key))}
+            >
+              <Select.Trigger>
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover>
+                <ListBox>
+                  <ListBox.Item id="all">All statuses</ListBox.Item>
+                  {statuses.map((item) => (
+                    <ListBox.Item id={item} key={item}>
+                      {item === "unverified"
+                        ? "Check official source"
+                        : item[0].toUpperCase() + item.slice(1)}
+                    </ListBox.Item>
+                  ))}
+                </ListBox>
+              </Select.Popover>
+            </Select>
         </label>
         <label className="filter-select">
           <span>Sort by</span>
-          <select
-            className="select"
-            value={sort}
-            onChange={(event) => chooseSort(event.target.value as SortMode)}
-          >
-            <option value="alpha">Alphabetical</option>
-            <option value="deadline">Deadline</option>
-          </select>
+            <Select
+              aria-label="Sort by"
+              className="filter-control"
+              selectedKey={sort}
+              onSelectionChange={(key) => chooseSort(String(key) as SortMode)}
+            >
+              <Select.Trigger>
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover>
+                <ListBox>
+                  <ListBox.Item id="alpha">Alphabetical</ListBox.Item>
+                  <ListBox.Item id="deadline">Deadline</ListBox.Item>
+                </ListBox>
+              </Select.Popover>
+            </Select>
         </label>
         <Button
           className="clear-filters"
           type="button"
-          variant="outline"
+          variant="primary"
           size="md"
           onPress={clearFilters}
         >
@@ -234,7 +260,6 @@ export function ScholarshipDirectory({ programs }: { programs: Program[] }) {
                         <StatusBadge status={availability} />
                       </span>
                     </span>
-                    <Accordion.Indicator />
                   </Accordion.Trigger>
                 </Accordion.Heading>
                 <Accordion.Panel>
@@ -261,10 +286,10 @@ export function ScholarshipDirectory({ programs }: { programs: Program[] }) {
                         </section>
                       ) : null}
                       <Link
-                        className="button button-secondary"
+                        className="button button-primary"
                         href={`/services/scholarships/${program.slug}`}
                       >
-                        View full program details
+                        View Details
                       </Link>
                     </div>
                   </Accordion.Body>
