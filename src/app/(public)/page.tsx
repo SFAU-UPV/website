@@ -35,22 +35,24 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-      <section className="section" style={{ background: "#f1eadf" }}>
-        <div className="container">
-          <SectionHeading eyebrow="Latest announcements" title="What’s new from OSA-SFAU" />
-          <div className="announcement-list">
-            {announcements.map((announcement) => (
-              <article className="announcement-row" key={announcement.id}>
-                <div>
-                  <h3>{announcement.title}</h3>
-                  <p>{announcement.summary}</p>
-                </div>
-                <span>{announcement.publishedAt}</span>
-              </article>
-            ))}
+      {announcements.length > 0 ? (
+        <section className="section" style={{ background: "#f1eadf" }}>
+          <div className="container">
+            <SectionHeading eyebrow="Latest announcements" title="What’s new from OSA-SFAU" />
+            <div className="announcement-list">
+              {announcements.map((announcement) => (
+                <article className="announcement-row" key={announcement.id}>
+                  <div>
+                    <h3>{announcement.title}</h3>
+                    <p>{announcement.summary}</p>
+                  </div>
+                  <span>{announcement.publishedAt}</span>
+                </article>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
       <section className="section">
         <div className="container">
           <SectionHeading eyebrow="Services" title="Find the right kind of support" />
