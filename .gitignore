@@ -27,6 +27,7 @@
 /.codex/
 /.agents/
 /.turbo/
+/anti-slop/
 .eslintcache
 
 # Miscellaneous local files

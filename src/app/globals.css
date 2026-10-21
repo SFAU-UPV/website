@@ -695,10 +695,10 @@ select:focus-visible {
     border-color 0.2s ease,
     box-shadow 0.2s ease;
 }
-.directory-filters .input:focus {
+.directory-filters .input:focus-visible {
   border-color: var(--maroon-700);
-  outline: 0;
-  box-shadow: 0 0 0 3px rgba(139, 18, 28, 0.13);
+  outline: 3px solid var(--maroon-700);
+  outline-offset: 2px;
 }
 .directory-filters .filter-select {
   position: relative;
@@ -830,9 +830,9 @@ select:focus-visible {
 }
 .carousel-button {
   display: inline-flex;
-  width: 2.5rem;
-  height: 2.5rem;
-  min-width: 2.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 2.75rem;
   align-items: center;
   justify-content: center;
   padding: 0;
@@ -918,8 +918,8 @@ select:focus-visible {
   bottom: 1rem;
   left: 1.1rem;
   color: white;
-  opacity: 0;
-  transform: translateY(1rem);
+  opacity: 1;
+  transform: none;
   transition:
     opacity 0.3s ease,
     transform 0.3s ease;
@@ -962,16 +962,36 @@ select:focus-visible {
   margin-top: 0.9rem;
 }
 .carousel-dot {
-  width: 0.65rem;
-  height: 0.65rem;
+  width: 2.75rem;
+  height: 2.75rem;
   padding: 0;
-  border: 1px solid var(--maroon-700);
+  border: 0;
   border-radius: 50%;
   background: transparent;
   cursor: pointer;
 }
-.carousel-dot.active {
+.carousel-dot::before {
+  display: block;
+  width: 0.65rem;
+  height: 0.65rem;
+  margin: auto;
+  border: 1px solid var(--maroon-700);
+  border-radius: 50%;
+  content: "";
+}
+.carousel-dot.active::before {
   background: var(--maroon-700);
+}
+.carousel-pause {
+  min-height: 2.75rem;
+  margin-top: 0.25rem;
+  border: 0;
+  background: transparent;
+  color: var(--maroon-900);
+  padding: 0.5rem;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
 }
 .hero > .container {
   width: 100%;
@@ -1303,9 +1323,9 @@ select:focus-visible {
     gap: 0.45rem;
   }
   .carousel-button {
-    width: 2.25rem;
-    height: 2.25rem;
-    min-width: 2.25rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    min-width: 2.75rem;
     border-radius: 0.65rem;
   }
   .service-slide {

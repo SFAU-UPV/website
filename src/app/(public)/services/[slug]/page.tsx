@@ -8,7 +8,8 @@ import {
   services,
   type Program,
 } from "@/src/types/domain";
-import { getPublicPrograms } from "@/src/lib/content";
+import { getPublicProgramsResult } from "@/src/lib/content";
+import { ErrorState } from "@/src/components/data-states";
 import { StatusBadge } from "@/src/components/status-badge";
 import { siteConfig } from "@/src/lib/constants";
 
@@ -385,7 +386,8 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
   if (!service) notFound();
   const isSlas = service.slug === "slas-online";
   const isOtherFinancialAssistance = service.slug === "other-financial-assistance";
-  const publicPrograms = await getPublicPrograms();
+  const programResult = await getPublicProgramsResult();
+  const publicPrograms = programResult.data;
   const assistancePrograms = isOtherFinancialAssistance
     ? publicPrograms.filter((program) => program.serviceSlug === "other-financial-assistance")
     : [];
@@ -411,7 +413,9 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
       />
       <section className="section">
         <div className="container service-detail-content">
-          {isSlas ? (
+          {programResult.status === "error" && (isOtherFinancialAssistance || service.slug === "student-assistantship") ? (
+            <ErrorState />
+          ) : isSlas ? (
             <SlasOnlineContent />
           ) : isOtherFinancialAssistance ? (
             <OtherFinancialAssistanceContent programs={assistancePrograms} />

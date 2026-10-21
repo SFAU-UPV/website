@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SectionHeading } from "@/src/components/section-heading";
-import { getPublicAnnouncements, getPublicPrograms } from "@/src/lib/content";
+import { getPublicAnnouncementsResult, getPublicProgramsResult } from "@/src/lib/content";
+import { EmptyState, ErrorState } from "@/src/components/data-states";
 import { ServiceCarousel } from "@/src/components/service-carousel";
 import { HeroActions } from "@/src/components/hero-actions";
 import { FeaturedOpportunities } from "@/src/components/featured-opportunities";
@@ -8,10 +9,14 @@ import { FeaturedOpportunities } from "@/src/components/featured-opportunities";
 export const instant = false;
 
 export default async function HomePage() {
-  const [programs, announcements] = await Promise.all([
-    getPublicPrograms(),
-    getPublicAnnouncements(),
+  const [programResult, announcementResult] = await Promise.all([
+    getPublicProgramsResult(),
+    getPublicAnnouncementsResult(),
   ]);
+  const featuredPrograms = programResult.data
+    .filter((program) => program.serviceSlug === "scholarships")
+    .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""))
+    .slice(0, 3);
   return (
     <>
       <section className="hero">
@@ -28,21 +33,25 @@ export default async function HomePage() {
           <HeroActions />
         </div>
       </section>
-      {announcements.length > 0 ? (
+      {announcementResult.status === "error" || announcementResult.data.length > 0 ? (
         <section className="section" style={{ background: "#f1eadf" }}>
           <div className="container">
             <SectionHeading eyebrow="Latest announcements" title="What’s new from OSA-SFAU" />
-            <div className="announcement-list">
-              {announcements.map((announcement) => (
-                <article className="announcement-row" key={announcement.id}>
-                  <div>
-                    <h3>{announcement.title}</h3>
-                    <p>{announcement.summary}</p>
-                  </div>
-                  <span>{announcement.publishedAt}</span>
-                </article>
-              ))}
-            </div>
+            {announcementResult.status === "error" ? (
+              <ErrorState />
+            ) : (
+              <div className="announcement-list">
+                {announcementResult.data.map((announcement) => (
+                  <article className="announcement-row" key={announcement.id}>
+                    <div>
+                      <h3>{announcement.title}</h3>
+                      <p>{announcement.summary}</p>
+                    </div>
+                    <span>{announcement.publishedAt}</span>
+                  </article>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       ) : null}
@@ -59,12 +68,16 @@ export default async function HomePage() {
             title="Start with the scholarship directory"
             intro="Browse by administering category. Application availability is shown only after SFAU verification."
           />
-          <FeaturedOpportunities
-            programs={programs
-              .filter((program) => program.serviceSlug === "scholarships")
-              .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""))
-              .slice(0, 3)}
-          />
+          {programResult.status === "error" ? (
+            <ErrorState />
+          ) : featuredPrograms.length === 0 ? (
+            <EmptyState
+              title="No published opportunities"
+              message="Verified scholarship information will appear here when published."
+            />
+          ) : (
+            <FeaturedOpportunities programs={featuredPrograms} />
+          )}
         </div>
       </section>
       <section className="section">

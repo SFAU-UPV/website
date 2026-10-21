@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Button, Card } from "@heroui/react";
 import { services } from "@/src/types/domain";
 
@@ -17,6 +17,16 @@ const serviceImages: Record<string, string> = {
 const repeatedServices = [...services, ...services, ...services];
 const middleStart = services.length;
 
+function subscribeReducedMotion(onChange: () => void) {
+  const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+  preference.addEventListener("change", onChange);
+  return () => preference.removeEventListener("change", onChange);
+}
+
+function getReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 export function ServiceCarousel() {
   const trackRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number | null>(null);
@@ -26,6 +36,8 @@ export function ServiceCarousel() {
   const loopResetTimerRef = useRef<number | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [userPaused, setUserPaused] = useState(false);
+  const reducedMotion = useSyncExternalStore(subscribeReducedMotion, getReducedMotion, () => false);
 
   useEffect(
     () => () => {
@@ -52,7 +64,7 @@ export function ServiceCarousel() {
   }, [getCardStep]);
 
   const scrollToPosition = useCallback(
-    (position: number, behavior: ScrollBehavior = "smooth") => {
+    (position: number, behavior: ScrollBehavior = reducedMotion ? "auto" : "smooth") => {
       const details = getCardStep();
       if (!details) return;
       const isForwardBoundary = position >= middleStart * 2;
@@ -89,7 +101,7 @@ export function ServiceCarousel() {
       positionRef.current = normalizedPosition;
       details.track.scrollTo({ left: normalizedPosition * details.step, behavior });
     },
-    [getCardStep],
+    [getCardStep, reducedMotion],
   );
 
   const scrollToService = useCallback(
@@ -112,10 +124,10 @@ export function ServiceCarousel() {
   }, [move]);
 
   useEffect(() => {
-    if (paused) return;
+    if (paused || userPaused || reducedMotion) return;
     const timer = window.setInterval(advanceAutomatically, 3000);
     return () => window.clearInterval(timer);
-  }, [advanceAutomatically, paused]);
+  }, [advanceAutomatically, paused, userPaused, reducedMotion]);
 
   function updateActiveIndex() {
     if (performance.now() < ignoreScrollUntilRef.current) return;
@@ -215,6 +227,16 @@ export function ServiceCarousel() {
           />
         ))}
       </div>
+      {!reducedMotion && (
+        <button
+          className="carousel-pause"
+          type="button"
+          aria-pressed={userPaused}
+          onClick={() => setUserPaused((value) => !value)}
+        >
+          {userPaused ? "Resume automatic slides" : "Pause automatic slides"}
+        </button>
+      )}
     </div>
   );
 }

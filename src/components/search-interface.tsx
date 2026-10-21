@@ -57,7 +57,12 @@ export function SearchInterface({
           {results.map((program) => (
             <Link
               className="card program-row"
-              href={`/services/scholarships/${program.slug}`}
+              href={
+                program.serviceSlug === "scholarships" ||
+                program.serviceSlug === "other-financial-assistance"
+                  ? `/services/${program.serviceSlug}/${program.slug}`
+                  : `/services/${program.serviceSlug}`
+              }
               key={program.id}
             >
               <div>

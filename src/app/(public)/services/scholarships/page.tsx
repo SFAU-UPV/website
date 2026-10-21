@@ -1,5 +1,6 @@
 import { Breadcrumbs } from "@/src/components/breadcrumbs";
-import { getPublicPrograms } from "@/src/lib/content";
+import { getPublicProgramsResult } from "@/src/lib/content";
+import { ErrorState } from "@/src/components/data-states";
 import { ScholarshipDirectory } from "@/src/components/scholarship-directory";
 
 export const instant = false;
@@ -11,7 +12,8 @@ const otherAssistanceNames = new Set([
 ]);
 
 export default async function ScholarshipsPage() {
-  const programs = (await getPublicPrograms()).filter(
+  const result = await getPublicProgramsResult();
+  const programs = result.data.filter(
     (program) =>
       program.serviceSlug === "scholarships" &&
       !otherAssistanceNames.has(program.name.trim().toLowerCase()),
@@ -36,7 +38,7 @@ export default async function ScholarshipsPage() {
       />
       <section className="section">
         <div className="container">
-          <ScholarshipDirectory programs={programs} />
+          {result.status === "error" ? <ErrorState /> : <ScholarshipDirectory programs={programs} />}
         </div>
       </section>
     </>
