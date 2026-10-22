@@ -307,6 +307,15 @@ select:focus-visible {
   gap: 1rem;
   padding-block: 0.9rem;
 }
+.footer-bottom-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.9rem 1.25rem;
+}
+.developer-credit {
+  color: #f9e6c8;
+}
 .hero {
   position: relative;
   overflow: hidden;
@@ -782,12 +791,6 @@ select:focus-visible {
     700 clamp(2.3rem, 5vw, 4rem) Georgia,
     serif;
 }
-.page-intro p {
-  max-width: 650px;
-  margin: 0.7rem 0 0;
-  color: #e7f1eb;
-  font-size: clamp(0.98rem, 1.6vw, 1.12rem);
-}
 .breadcrumbs {
   padding: 1.25rem 0 0;
   color: var(--muted);
@@ -975,6 +978,48 @@ select:focus-visible {
 .prose-section > p {
   max-width: 68ch;
   text-wrap: pretty;
+}
+.about-page {
+  max-width: 960px;
+}
+.about-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 2.5rem;
+  align-items: start;
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--line);
+}
+.about-overview h2 {
+  max-width: 18ch;
+  margin: 0 0 0.7rem;
+  color: var(--maroon-900);
+  font:
+    700 clamp(1.8rem, 3vw, 2.5rem)/1.1 Georgia,
+    serif;
+}
+.about-overview p {
+  max-width: 62ch;
+  margin: 0;
+}
+.about-page-nav {
+  display: grid;
+  gap: 0.65rem;
+  padding: 1rem 0 0 1rem;
+  border-left: 2px solid var(--gold);
+}
+.about-page-nav strong {
+  color: var(--maroon-900);
+  font-size: 0.92rem;
+}
+.about-page-nav a {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.about-page-nav a:hover,
+.about-page-nav a:focus-visible {
+  color: var(--maroon-900);
 }
 .program-categories,
 .preview-status {
@@ -1826,6 +1871,16 @@ select:focus-visible {
     align-items: flex-start;
     flex-direction: column;
     gap: 0.35rem;
+  }
+  .footer-bottom-links {
+    justify-content: flex-start;
+  }
+  .about-overview {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .about-page-nav {
+    padding: 0.9rem 0 0 1rem;
   }
 }
 

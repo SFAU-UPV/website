@@ -27,15 +27,27 @@ export default function AboutPage() {
       <section className="page-intro">
         <div className="container">
           <h1>About OSA-SFAU</h1>
-          <p>
-            The Office of Student Affairs - Scholarships and Financial Assistance Unit supports
-            equitable access to higher education for UP Visayas students.
-          </p>
         </div>
       </section>
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "About" }]} />
       <section className="section">
-        <div className="container detail-layout">
+        <div className="container about-page">
+          <div className="about-overview">
+            <div>
+              <h2>Support information for UP Visayas students</h2>
+              <p>
+                The Office of Student Affairs - Scholarships and Financial Assistance Unit helps
+                students understand available scholarships, financial assistance, and related
+                support services.
+              </p>
+            </div>
+            <nav className="about-page-nav" aria-label="About page sections">
+              <strong>On this page</strong>
+              <a href="#mandate">Mandate and functions</a>
+              <a href="#team">SFAU team</a>
+              <a href="#contact">Contact information</a>
+            </nav>
+          </div>
           <article>
             <div className="prose-section" id="mandate">
               <h2>Mandate and Functions</h2>
@@ -87,7 +99,12 @@ export default function AboutPage() {
                 <p>
                   <strong>Telephone</strong>
                   <br />
-                  {siteConfig.contact.phone}
+                  <a
+                    className="text-link"
+                    href={`tel:${siteConfig.contact.phone.replace(/[^0-9+]/g, "")}`}
+                  >
+                    {siteConfig.contact.phone}
+                  </a>
                 </p>
                 <p>
                   <strong>Office</strong>

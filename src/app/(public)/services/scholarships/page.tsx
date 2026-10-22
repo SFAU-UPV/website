@@ -28,10 +28,6 @@ export default async function ScholarshipsPage({
       <section className="page-intro">
         <div className="container">
           <h1>Scholarship Programs</h1>
-          <p>
-            Browse published opportunities by category, degree program, application status, or
-            deadline. Application availability is shown only after SFAU verification.
-          </p>
         </div>
       </section>
       <Breadcrumbs

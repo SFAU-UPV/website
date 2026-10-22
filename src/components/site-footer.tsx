@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { siteConfig } from "@/src/lib/constants";
+import { DeveloperCredit } from "@/src/components/developer-credit";
 
 export function SiteFooter() {
   return (
@@ -51,7 +52,10 @@ export function SiteFooter() {
       <div className="footer-bottom">
         <div className="container">
           <span>Official information from OSA-SFAU, UP Visayas.</span>
-          <a href="https://upv.edu.ph/" target="_blank" rel="noreferrer">upv.edu.ph</a>
+          <div className="footer-bottom-links">
+            <a href="https://upv.edu.ph/" target="_blank" rel="noreferrer">upv.edu.ph</a>
+            <DeveloperCredit />
+          </div>
         </div>
       </div>
     </footer>

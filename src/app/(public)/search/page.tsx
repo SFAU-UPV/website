@@ -18,7 +18,6 @@ export default async function SearchPage({
       <section className="page-intro">
         <div className="container">
           <h1>Find SFAU information</h1>
-          <p>Search SFAU services and published programs.</p>
         </div>
       </section>
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Search" }]} />

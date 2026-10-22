@@ -19,7 +19,6 @@ export default function ServicesPage() {
       <section className="page-intro">
         <div className="container">
           <h1>Our services</h1>
-          <p>Official scholarships, assistance, and student support information from OSA-SFAU.</p>
         </div>
       </section>
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Services" }]} />
