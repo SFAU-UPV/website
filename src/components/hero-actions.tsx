@@ -13,7 +13,14 @@ export function HeroActions() {
         variant="primary"
         onPress={() => router.push("/services/scholarships")}
       >
-        Explore scholarships
+        Browse scholarships
+      </Button>
+      <Button
+        className="hero-button hero-button-secondary"
+        variant="outline"
+        onPress={() => router.push("/services")}
+      >
+        View all services
       </Button>
     </div>
   );

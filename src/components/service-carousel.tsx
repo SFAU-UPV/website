@@ -186,6 +186,8 @@ export function ServiceCarousel() {
                   <span className="service-slide-title typography typography--h3 typography--weight-bold">
                     {service.name}
                   </span>
+                  <span className="service-slide-description">{service.description}</span>
+                  <span className="service-slide-action">View service</span>
                 </span>
               </Link>
             </Card>

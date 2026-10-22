@@ -1,7 +1,11 @@
+import { Skeleton } from "@heroui/react";
+
 export function LoadingState({ label = "Loading content" }: { label?: string }) {
   return (
-    <div className="empty-state" role="status" aria-live="polite">
-      <p>{label}…</p>
+    <div className="loading-state" role="status" aria-live="polite" aria-label={label}>
+      <Skeleton className="loading-skeleton loading-skeleton--title" />
+      <Skeleton className="loading-skeleton loading-skeleton--line" />
+      <Skeleton className="loading-skeleton loading-skeleton--line loading-skeleton--line-short" />
     </div>
   );
 }

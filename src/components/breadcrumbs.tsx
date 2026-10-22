@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Breadcrumbs as HeroBreadcrumbs } from "@heroui/react";
 
 export interface BreadcrumbItem {
   label: string;
@@ -6,19 +6,18 @@ export interface BreadcrumbItem {
 }
 export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
   return (
-    <nav className="breadcrumbs container" aria-label="Breadcrumb">
-      <ol>
-        {items.map((item, index) => (
-          <li key={`${item.label}-${index}`}>
-            {item.href ? (
-              <Link href={item.href}>{item.label}</Link>
-            ) : (
-              <span aria-current="page">{item.label}</span>
-            )}
-            {index < items.length - 1 && <span aria-hidden="true"> / </span>}
-          </li>
-        ))}
-      </ol>
-    </nav>
+    <HeroBreadcrumbs className="breadcrumbs container" aria-label="Breadcrumb">
+      {items.map((item, index) => (
+        item.href ? (
+          <HeroBreadcrumbs.Item key={`${item.label}-${index}`} href={item.href}>
+            {item.label}
+          </HeroBreadcrumbs.Item>
+        ) : (
+          <HeroBreadcrumbs.Item key={`${item.label}-${index}`}>
+            {item.label}
+          </HeroBreadcrumbs.Item>
+        )
+      ))}
+    </HeroBreadcrumbs>
   );
 }
