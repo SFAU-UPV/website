@@ -6,8 +6,8 @@ export default function AdminSetupPage() {
       <div className="container admin-auth-layout">
         <div className="admin-auth-card">
           <div className="admin-auth-heading">
-            <h1>Create Admin Account</h1>
-            <p>Use this one-time setup flow to create the first Neon Auth account.</p>
+            <h1>Create a staff sign-in</h1>
+            <p>Create the first sign-in account. Workspace access is granted separately by an administrator.</p>
           </div>
           <AdminSetupForm />
         </div>

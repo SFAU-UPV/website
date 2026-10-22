@@ -27,7 +27,7 @@ type DbCycle = {
   verification_state: "unverified" | "verified";
   admin_override: ApplicationCycle["statusOverride"] | null;
 };
-type DbProgram = {
+export type DbProgram = {
   id: string;
   slug: string;
   name: string;
@@ -74,7 +74,7 @@ function mapCycle(row: DbCycle): ApplicationCycle {
     statusOverride: row.admin_override ?? undefined,
   };
 }
-function mapProgram(row: DbProgram): Program {
+export function mapProgram(row: DbProgram): Program {
   const categories = (row.category_slugs ?? [])
     .map((item) => String(item).trim().toLowerCase())
     .filter(

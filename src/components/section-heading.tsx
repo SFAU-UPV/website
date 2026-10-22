@@ -1,17 +1,12 @@
 export function SectionHeading({
-  eyebrow,
   title,
   intro,
 }: {
-  eyebrow?: string;
   title: string;
   intro?: string;
 }) {
   return (
     <div className="section-heading">
-      {eyebrow && (
-        <p className="eyebrow typography typography--body-xs typography--weight-bold">{eyebrow}</p>
-      )}
       <h2 className="typography typography--h2 typography--weight-semibold">{title}</h2>
       {intro && <p className="typography typography--body-sm typography--color-muted">{intro}</p>}
     </div>

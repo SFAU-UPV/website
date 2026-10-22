@@ -40,7 +40,9 @@ export function ProgramDetail({
   const cycle = getPrimaryCycle(program);
   const availability = resolveApplicationAvailability(cycle);
   const applyEnabled = canApply(program, cycle);
-  const overview = (program.description ?? program.summary).trim();
+  const summary = program.summary?.trim();
+  const description = program.description?.trim();
+  const overview = description || summary;
   return (
     <>
       <Breadcrumbs items={breadcrumbs} />
@@ -48,10 +50,9 @@ export function ProgramDetail({
         <div className="container detail-layout">
           <article>
             <div className="section-heading">
-              <p className="eyebrow">{getProgramCategories(program).join(" · ")}</p>
               <h1>{program.name}</h1>
+              <p className="program-categories">{getProgramCategories(program).join(" · ")}</p>
               <StatusBadge status={availability} />
-              {program.summary ? <p>{program.summary}</p> : null}
             </div>
             <div className={`availability-panel availability-${availability}`}>
               <strong>
@@ -82,6 +83,7 @@ export function ProgramDetail({
             {overview ? (
               <section className="prose-section" id="overview">
                 <h2>Overview</h2>
+                {summary && description && summary !== description ? <p>{summary}</p> : null}
                 <p>{overview}</p>
               </section>
             ) : null}

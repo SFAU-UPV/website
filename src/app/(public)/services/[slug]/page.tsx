@@ -26,7 +26,6 @@ function SlasOnlineContent() {
     <>
       <section className="service-overview">
         <div>
-          <p className="eyebrow">Financial assistance intake</p>
           <h2>What is SLAS Online?</h2>
           <p>
             SLAS Online is a web-based program that collects information from students who wish to
@@ -124,7 +123,6 @@ function OtherFinancialAssistanceContent({
     <>
       <section className="service-overview">
         <div>
-          <p className="eyebrow">Student support programs</p>
           <h2>Other financial assistance</h2>
           <p>
             Explore assistance programs available through the University of the Philippines Visayas
@@ -140,7 +138,6 @@ function OtherFinancialAssistanceContent({
         </div>
       </section>
       <section className="service-content-section other-assistance-programs">
-        <p className="eyebrow">Available programs</p>
         <h2>Programs</h2>
         <AssistanceDirectory programs={programs} />
       </section>
@@ -158,7 +155,6 @@ function StudentAssistantshipContent({ program }: { program?: Program }) {
     <>
       <section className="service-overview">
         <div>
-          <p className="eyebrow">Student employment assistance</p>
           <h2>Student Assistantship Program</h2>
           <p>
             The program provides eligible undergraduate students with part-time work opportunities
@@ -239,7 +235,6 @@ function ShareLoanContent() {
     <>
       <section className="service-overview">
         <div>
-          <p className="eyebrow">Emergency student support</p>
           <h2>Student Health and Related Emergency Loan</h2>
           <p>
             SHARE stands for Student Health and Related Emergency. It provides a loan option for
@@ -313,7 +308,6 @@ function StudentInsuranceContent() {
     <>
       <section className="service-overview">
         <div>
-          <p className="eyebrow">Student protection</p>
           <h2>UP Student Insurance Policy</h2>
           <p>
             The UP System encourages the provision of insurance to students while they are enrolled
@@ -399,9 +393,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
     <>
       <section className="page-intro">
         <div className="container">
-          <p className="eyebrow">Service detail</p>
           <h1>{service.name}</h1>
-          <p>{service.description}</p>
         </div>
       </section>
       <Breadcrumbs

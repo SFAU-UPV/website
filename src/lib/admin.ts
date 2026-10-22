@@ -12,7 +12,6 @@ export type AdminActionState = {
 };
 type Row = Record<string, unknown>;
 type Sql = ReturnType<typeof getNeonSql>;
-const emptyState: AdminActionState = { ok: false };
 const text = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
 const list = (form: FormData, key: string) =>
   text(form, key)
@@ -105,9 +104,14 @@ function programPayload(form: FormData) {
     eligibility: list(form, "eligibility").map(sanitize),
     requirements: list(form, "requirements").map(sanitize),
     benefits: list(form, "benefits").map(sanitize),
-    degree_programs: list(form, "degree_programs"),
+    degree_programs: Array.from(new Set(
+      form.getAll("degree_programs")
+        .filter((entry): entry is string => typeof entry === "string")
+        .flatMap((entry) => entry.split(/\r?\n/))
+        .map((entry) => entry.trim())
+        .filter(Boolean),
+    )),
     application_process: list(form, "application_process").map(sanitize),
-    application_url: httpsUrl(text(form, "application_url"), "Application link"),
   };
 }
 
@@ -123,7 +127,7 @@ export async function getAdminSnapshot() {
     sql.query("select id,slug,name from service_categories order by name"),
     sql.query("select id,slug,name from scholarship_categories order by name"),
     sql.query(
-      "select id,entity_type,entity_id,action,created_at,actor_id,before_data,after_data from audit_logs order by created_at desc limit 30",
+      "select l.id,l.entity_type,l.entity_id,l.action,l.created_at,l.actor_id,l.before_data,l.after_data,ap.display_name as actor_name,coalesce(p.name,a.title,cp.name) as entity_name from audit_logs l left join admin_profiles ap on ap.id=l.actor_id left join programs p on l.entity_type='program' and p.id=l.entity_id left join announcements a on l.entity_type='announcement' and a.id=l.entity_id left join application_cycles c on l.entity_type='application_cycle' and c.id=l.entity_id left join programs cp on cp.id=c.program_id order by l.created_at desc limit 30",
     ),
   ]);
   return { programs, announcements, services, categories, audits };
@@ -131,16 +135,13 @@ export async function getAdminSnapshot() {
 export async function getAdminProgramPreview(id: string) {
   const { sql } = await requireAdmin();
   const rows = await sql.query(
-    "select p.*, sc.name as service_name, coalesce(array_agg(distinct sh.name) filter (where sh.name is not null), '{}') as category_names from programs p left join service_categories sc on sc.id=p.service_category_id left join program_category_links pcl on pcl.program_id=p.id left join scholarship_categories sh on sh.id=pcl.category_id where p.id=$1 group by p.id, sc.name",
+    "select p.*, sc.slug as service_slug, coalesce(array_agg(distinct sh.slug::text) filter (where sh.slug is not null), '{}') as category_slugs, coalesce(jsonb_agg(distinct jsonb_build_object('id', ac.id, 'program_id', ac.program_id, 'verified_open_at', ac.verified_open_at, 'close_at', ac.close_at, 'external_url', ac.external_url, 'link_type', ac.link_type, 'verification_state', ac.verification_state, 'admin_override', ac.admin_override)) filter (where ac.id is not null), '[]') as application_cycles from programs p left join service_categories sc on sc.id=p.service_category_id left join program_category_links pcl on pcl.program_id=p.id left join scholarship_categories sh on sh.id=pcl.category_id left join application_cycles ac on ac.program_id=p.id and ac.archived_at is null where p.id=$1 group by p.id, sc.slug",
     [id],
   );
   if (!rows[0]) throw new Error("Program preview not found.");
   return rows[0];
 }
-export async function saveProgramAction(
-  _previous: AdminActionState = emptyState,
-  form: FormData,
-): Promise<AdminActionState> {
+export async function saveProgramAction(form: FormData): Promise<AdminActionState> {
   try {
     const { sql, user } = await requireAdmin();
     const id = text(form, "id"),
@@ -185,22 +186,6 @@ export async function saveProgramAction(
         "insert into program_category_links (program_id, category_id) select $1, id from scholarship_categories where slug = any($2::text[]) on conflict do nothing",
         [rows[0].id, categories],
       );
-    const cycle = (
-      await sql.query(
-        "select id from application_cycles where program_id=$1 and archived_at is null order by updated_at desc limit 1",
-        [rows[0].id],
-      )
-    )[0];
-    if (cycle)
-      await sql.query(
-        "update application_cycles set external_url=$1, updated_at=now() where id=$2",
-        [payload.application_url, cycle.id],
-      );
-    else if (payload.application_url)
-      await sql.query("insert into application_cycles (program_id, external_url) values ($1, $2)", [
-        rows[0].id,
-        payload.application_url,
-      ]);
     await audit(
       sql,
       String(user.id),
@@ -225,7 +210,7 @@ export async function saveProgramAction(
     revalidatePath("/services/student-assistantship");
     return {
       ok: true,
-      message: id ? "Program updated." : "Program saved as draft.",
+      message: id ? "Program updated." : payload.publication_status === "published" ? "Program saved and published." : "Program saved as draft.",
       program: updatedProgram,
     };
   } catch (error) {
@@ -276,10 +261,7 @@ export async function changeProgramStateAction(form: FormData): Promise<AdminAct
     };
   }
 }
-export async function saveCycleAction(
-  _previous: AdminActionState = emptyState,
-  form: FormData,
-): Promise<AdminActionState> {
+export async function saveCycleAction(form: FormData): Promise<AdminActionState> {
   try {
     const { sql, user } = await requireAdmin();
     const id = text(form, "id"),
@@ -287,9 +269,25 @@ export async function saveCycleAction(
       starts = text(form, "verified_open_at"),
       closes = text(form, "close_at");
     if (!programId) throw new Error("Choose a program.");
+    if (id) {
+      const existing = (await sql.query(
+        "select program_id from application_cycles where id=$1 and archived_at is null",
+        [id],
+      ))[0];
+      if (!existing) throw new Error("Application cycle not found.");
+      if (String(existing.program_id) !== programId)
+        throw new Error("An application cycle cannot be moved to another program.");
+    }
     if (starts && closes && closes < starts)
       throw new Error("Close date must be on or after the opening date.");
     const url = httpsUrl(text(form, "external_url"), "Application URL");
+    const override = text(form, "admin_override");
+    if (override && !["upcoming", "closed", "suspended"].includes(override))
+      throw new Error("Choose a valid hold or close state.");
+    const verified = form.get("verify_details") === "on";
+    if (verified && (!starts || !closes || !url))
+      throw new Error("Add both dates and the HTTPS application URL before verifying this cycle.");
+    const verificationState = verified ? "verified" : "unverified";
     const values = [
       programId,
       nullable(text(form, "academic_year")),
@@ -298,19 +296,20 @@ export async function saveCycleAction(
       closes || null,
       url,
       text(form, "link_type") || null,
-      text(form, "verification_state") === "verified" ? "verified" : "unverified",
-      text(form, "admin_override") || null,
+      verificationState,
+      override || null,
+      verified ? JSON.stringify({ verified_by: String(user.id), verified_at: new Date().toISOString() }) : "{}",
     ];
     const row = id
       ? (
           await sql.query(
-            "update application_cycles set program_id=$1,academic_year=$2,cycle_label=$3,verified_open_at=$4,close_at=$5,external_url=$6,link_type=$7,verification_state=$8,admin_override=$9,updated_at=now() where id=$10 returning *",
+            "update application_cycles set program_id=$1,academic_year=$2,cycle_label=$3,verified_open_at=$4,close_at=$5,external_url=$6,link_type=$7,verification_state=$8,admin_override=$9,verification_metadata=$10::jsonb,updated_at=now() where id=$11 and archived_at is null returning *",
             [...values, id],
           )
         )[0]
       : (
           await sql.query(
-            "insert into application_cycles (program_id,academic_year,cycle_label,verified_open_at,close_at,external_url,link_type,verification_state,admin_override) values ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning *",
+            "insert into application_cycles (program_id,academic_year,cycle_label,verified_open_at,close_at,external_url,link_type,verification_state,admin_override,verification_metadata) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb) returning *",
             values,
           )
         )[0];
@@ -325,7 +324,10 @@ export async function saveCycleAction(
       { id: row.id, program_id: programId, verification_state: row.verification_state },
     );
     revalidatePath("/");
+    revalidatePath("/admin");
     revalidatePath("/services/scholarships");
+    const program = (await sql.query("select slug from programs where id=$1", [programId]))[0];
+    if (program?.slug) revalidatePath(`/services/scholarships/${program.slug}`);
     return { ok: true, message: id ? "Application cycle updated." : "Application cycle created." };
   } catch (error) {
     return {
@@ -334,10 +336,33 @@ export async function saveCycleAction(
     };
   }
 }
-export async function saveAnnouncementAction(
-  _previous: AdminActionState = emptyState,
-  form: FormData,
-): Promise<AdminActionState> {
+export async function archiveCycleAction(form: FormData): Promise<AdminActionState> {
+  try {
+    const { sql, user } = await requireAdmin();
+    const id = text(form, "id");
+    if (!id) throw new Error("Choose an application cycle.");
+    const before = (await sql.query(
+      "select id,program_id,verification_state,archived_at from application_cycles where id=$1 and archived_at is null",
+      [id],
+    ))[0];
+    if (!before) throw new Error("Application cycle not found.");
+    const after = (await sql.query(
+      "update application_cycles set archived_at=now(),verification_state='unverified',updated_at=now() where id=$1 and archived_at is null returning id,program_id,verification_state,archived_at",
+      [id],
+    ))[0];
+    if (!after) throw new Error("Application cycle could not be archived.");
+    await audit(sql, String(user.id), "application_cycle", id, "archived", before, after);
+    revalidatePath("/admin");
+    revalidatePath("/");
+    revalidatePath("/services/scholarships");
+    const program = (await sql.query("select slug from programs where id=$1", [before.program_id]))[0];
+    if (program?.slug) revalidatePath(`/services/scholarships/${program.slug}`);
+    return { ok: true, message: "Application cycle archived." };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : "Application cycle could not be archived." };
+  }
+}
+export async function saveAnnouncementAction(form: FormData): Promise<AdminActionState> {
   try {
     const { sql, user } = await requireAdmin();
     const id = text(form, "id"),

@@ -17,7 +17,7 @@ test("resolver requires a usable link and application window", () => {
   assert.equal(resolveApplicationAvailability(undefined, atStart), "unverified");
   assert.equal(
     resolveApplicationAvailability({ ...base, verificationStatus: "unverified" }, atStart),
-    "open",
+    "unverified",
   );
   assert.equal(
     resolveApplicationAvailability(
@@ -32,6 +32,12 @@ test("resolver requires a usable link and application window", () => {
   );
   assert.equal(
     resolveApplicationAvailability({ ...base, startsOn: null, endsOn: null }, atStart),
+    "unverified",
+  );
+  assert.equal(resolveApplicationAvailability({ ...base, startsOn: null }, atStart), "unverified");
+  assert.equal(resolveApplicationAvailability({ ...base, endsOn: null }, atStart), "unverified");
+  assert.equal(
+    resolveApplicationAvailability({ ...base, verificationStatus: "unverified", statusOverride: "upcoming" }, atStart),
     "unverified",
   );
 });

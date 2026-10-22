@@ -1,10 +1,10 @@
-import Link from "next/link";
 import { SectionHeading } from "@/src/components/section-heading";
 import { getPublicAnnouncementsResult, getPublicProgramsResult } from "@/src/lib/content";
 import { EmptyState, ErrorState } from "@/src/components/data-states";
 import { ServiceCarousel } from "@/src/components/service-carousel";
 import { HeroActions } from "@/src/components/hero-actions";
 import { FeaturedOpportunities } from "@/src/components/featured-opportunities";
+import { HomeScrollMotion } from "@/src/components/home-scroll-motion";
 
 export const instant = false;
 
@@ -19,11 +19,9 @@ export default async function HomePage() {
     .slice(0, 3);
   return (
     <>
+      <HomeScrollMotion />
       <section className="hero">
         <div className="container hero-content">
-          <p className="eyebrow typography typography--body-xs typography--weight-bold">
-            Supporting UPV students
-          </p>
           <h1 className="typography typography--h1 typography--weight-bold">
             Find support for your UPV journey.
           </h1>
@@ -34,9 +32,9 @@ export default async function HomePage() {
         </div>
       </section>
       {announcementResult.status === "error" || announcementResult.data.length > 0 ? (
-        <section className="section" style={{ background: "#f1eadf" }}>
+        <section className="section announcement-section">
           <div className="container">
-            <SectionHeading eyebrow="Latest announcements" title="What’s new from OSA-SFAU" />
+            <SectionHeading title="What’s new from OSA-SFAU" />
             {announcementResult.status === "error" ? (
               <ErrorState />
             ) : (
@@ -57,43 +55,28 @@ export default async function HomePage() {
       ) : null}
       <section className="section">
         <div className="container">
-          <SectionHeading eyebrow="Services" title="Find the right kind of support" />
+          <SectionHeading title="Find the right kind of support" />
           <ServiceCarousel />
         </div>
       </section>
       <section className="section">
         <div className="container">
           <SectionHeading
-            eyebrow="Featured opportunities"
             title="Start with the scholarship directory"
             intro="Browse by administering category. Application availability is shown only after SFAU verification."
           />
-          {programResult.status === "error" ? (
-            <ErrorState />
-          ) : featuredPrograms.length === 0 ? (
-            <EmptyState
-              title="No published opportunities"
-              message="Verified scholarship information will appear here when published."
-            />
-          ) : (
-            <FeaturedOpportunities programs={featuredPrograms} />
-          )}
-        </div>
-      </section>
-      <section className="section">
-        <div className="container mission-panel">
-          <div>
-            <p className="eyebrow">About the unit</p>
-            <h2>Equitable access to higher education</h2>
+          <div data-home-scroll="scholarships">
+            {programResult.status === "error" ? (
+              <ErrorState />
+            ) : featuredPrograms.length === 0 ? (
+              <EmptyState
+                title="No published opportunities"
+                message="Verified scholarship information will appear here when published."
+              />
+            ) : (
+              <FeaturedOpportunities programs={featuredPrograms} />
+            )}
           </div>
-          <p>
-            The OSA-SFAU administers and facilitates scholarship programs and financial assistance
-            services, evaluates students’ financial circumstances, processes assistance
-            applications, and helps students access available resources.
-          </p>
-          <Link className="text-link" href="/about">
-            Read the OSA-SFAU overview
-          </Link>
         </div>
       </section>
     </>

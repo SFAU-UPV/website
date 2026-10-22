@@ -1,23 +1,31 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@heroui/react";
 import { AdminPasswordField } from "@/src/components/admin-password-field";
 import { authClient } from "@/src/lib/auth/client";
 
 export function AdminLoginForm() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (busy) return;
     setBusy(true);
     setError("");
-    const result = await authClient.signIn.email({ email, password });
-    if (result.error) setError(result.error.message ?? "Sign-in failed.");
-    else window.location.href = "/admin";
-    setBusy(false);
+    try {
+      const result = await authClient.signIn.email({ email, password });
+      if (result.error) setError(result.error.message ?? "Sign-in failed. Check your credentials and try again.");
+      else router.push("/admin");
+    } catch {
+      setError("Could not reach the sign-in service. Check your connection and try again.");
+    } finally {
+      setBusy(false);
+    }
   }
   return (
     <>
@@ -51,7 +59,7 @@ export function AdminLoginForm() {
         </Button>
       </form>
       <p className="admin-auth-note">
-        <a href="/admin/setup">Create the first admin account</a>
+        Need access? Contact the SFAU administrator. <a href="/admin/setup">First-time setup</a>
       </p>
     </>
   );

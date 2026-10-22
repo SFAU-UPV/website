@@ -28,6 +28,8 @@
 /.agents/
 /.turbo/
 /anti-slop/
+/impeccable/
+/graphify-out/
 .eslintcache
 
 # Miscellaneous local files

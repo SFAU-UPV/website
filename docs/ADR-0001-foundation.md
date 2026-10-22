@@ -1,5 +1,7 @@
 # ADR-0001: SFAU website foundation
 
+Status: Superseded for database, authentication, and deployment tooling. The current implementation uses Neon Postgres and Managed Neon Auth; see `README.md` and `PRODUCT.md`. The domain and application-availability decisions below still apply.
+
 ## Decision
 
 Use Next.js App Router with TypeScript and Tailwind CSS, backed by PostgreSQL through Supabase. Server Components remain the default for public content. Client Components are reserved for browser interaction such as filters and accessible form controls. Administrative authorization will be enforced server-side using Supabase Auth and database policies.

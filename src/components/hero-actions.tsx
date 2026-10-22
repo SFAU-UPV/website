@@ -15,13 +15,6 @@ export function HeroActions() {
       >
         Explore scholarships
       </Button>
-      <Button
-        className="hero-button hero-about-button"
-        variant="primary"
-        onPress={() => router.push("/about")}
-      >
-        About OSA-SFAU
-      </Button>
     </div>
   );
 }

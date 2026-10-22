@@ -107,7 +107,17 @@ export function getProgramCategories(program: Program): ScholarshipCategory[] {
   return Array.from(new Set([program.category, ...(program.categories ?? [])]));
 }
 export function getPrimaryCycle(program: Program): ApplicationCycle | undefined {
-  return program.cycles?.[0];
+  const cycles = program.cycles ?? [];
+  const now = new Date();
+  const open = cycles.find((cycle) => resolveApplicationAvailability(cycle, now) === "open");
+  if (open) return open;
+  const upcoming = cycles
+    .filter((cycle) => resolveApplicationAvailability(cycle, now) === "upcoming")
+    .sort((a, b) => (a.startsOn ?? "").localeCompare(b.startsOn ?? ""));
+  if (upcoming[0]) return upcoming[0];
+  const suspended = cycles.find((cycle) => resolveApplicationAvailability(cycle, now) === "suspended");
+  if (suspended) return suspended;
+  return [...cycles].sort((a, b) => (b.startsOn ?? "").localeCompare(a.startsOn ?? ""))[0];
 }
 function titleCaseDegree(value: string) {
   return value
@@ -166,22 +176,23 @@ export const FIXTURE_NOW = new Date("2026-10-14T00:00:00+08:00");
 
 export function resolveApplicationAvailability(
   cycle: ApplicationCycle | undefined,
-  now = FIXTURE_NOW,
+  now = new Date(),
 ): ApplicationAvailability {
   if (!cycle) return "unverified";
+  if (cycle.verificationStatus !== "verified") return "unverified";
+  if (!validHttps(cycle.externalApplicationUrl)) return "unverified";
+  if (!cycle.startsOn || !cycle.endsOn) return "unverified";
   if (cycle.statusOverride) return cycle.statusOverride;
   if (cycle.declaredAvailability === "suspended") return "suspended";
   if (cycle.declaredAvailability === "closed") return "closed";
   if (cycle.declaredAvailability === "upcoming") return "upcoming";
-  if (!validHttps(cycle.externalApplicationUrl)) return "unverified";
   const today = manilaDate(now);
   if (cycle.startsOn && today < cycle.startsOn) return "upcoming";
   if (cycle.endsOn && today > cycle.endsOn) return "closed";
-  if (!cycle.startsOn && !cycle.endsOn) return "unverified";
   return "open";
 }
 
-export function canApply(program: Program, cycle = getPrimaryCycle(program), now = FIXTURE_NOW) {
+export function canApply(program: Program, cycle = getPrimaryCycle(program), now = new Date()) {
   return (
     program.publicationStatus === "published" &&
     resolveApplicationAvailability(cycle, now) === "open" &&

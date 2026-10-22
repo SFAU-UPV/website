@@ -11,7 +11,12 @@ const otherAssistanceNames = new Set([
   "lingap iskolar ng bayan",
 ]);
 
-export default async function ScholarshipsPage() {
+export default async function ScholarshipsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const initialFilters = await searchParams;
   const result = await getPublicProgramsResult();
   const programs = result.data.filter(
     (program) =>
@@ -22,11 +27,7 @@ export default async function ScholarshipsPage() {
     <>
       <section className="page-intro">
         <div className="container">
-          <p className="eyebrow">Scholarship Directory</p>
           <h1>Scholarship Programs</h1>
-          <p>
-            Explore opportunities administered by UP, Government Agencies, and Private Institutions.
-          </p>
         </div>
       </section>
       <Breadcrumbs
@@ -38,7 +39,15 @@ export default async function ScholarshipsPage() {
       />
       <section className="section">
         <div className="container">
-          {result.status === "error" ? <ErrorState /> : <ScholarshipDirectory programs={programs} />}
+          {result.status === "error" ? (
+            <ErrorState />
+          ) : (
+            <ScholarshipDirectory
+              key={JSON.stringify(initialFilters)}
+              programs={programs}
+              initialFilters={initialFilters}
+            />
+          )}
         </div>
       </section>
     </>

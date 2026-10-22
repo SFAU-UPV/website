@@ -1,5 +1,6 @@
 ﻿import { siteConfig } from "@/src/lib/constants";
 import { Breadcrumbs } from "@/src/components/breadcrumbs";
+import Image from "next/image";
 
 const sfauTeam = [
   {
@@ -25,7 +26,6 @@ export default function AboutPage() {
     <>
       <section className="page-intro">
         <div className="container">
-          <p className="eyebrow">About the unit</p>
           <h1>About OSA-SFAU</h1>
           <p>
             The Office of Student Affairs - Scholarships and Financial Assistance Unit supports
@@ -37,14 +37,6 @@ export default function AboutPage() {
       <section className="section">
         <div className="container detail-layout">
           <article>
-            <div className="prose-section" id="overview">
-              <h2>Overview</h2>
-              <p>
-                {siteConfig.name} ({siteConfig.shortName}) administers and facilitates scholarship
-                programs and financial assistance services to support the educational needs of UP
-                Visayas students.
-              </p>
-            </div>
             <div className="prose-section" id="mandate">
               <h2>Mandate and Functions</h2>
               <p>
@@ -56,7 +48,6 @@ export default function AboutPage() {
               </p>
             </div>
             <div className="prose-section" id="team">
-              <p className="eyebrow">Our team</p>
               <h2>Scholarships and Financial Assistance Unit</h2>
               <div className="team-grid">
                 {sfauTeam.map((member, index) => (
@@ -65,7 +56,13 @@ export default function AboutPage() {
                     key={member.name}
                   >
                     <div className="team-photo-frame">
-                      <img src={`/about/team/${member.image}`} alt={`${member.name}, SFAU staff`} />
+                      <Image
+                        src={`/about/team/${member.image}`}
+                        alt={`${member.name}, SFAU staff`}
+                        width={120}
+                        height={120}
+                        sizes="(max-width: 720px) 96px, 120px"
+                      />
                     </div>
                     <div className="team-card-content">
                       <h3>{member.name}</h3>

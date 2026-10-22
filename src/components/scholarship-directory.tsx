@@ -25,31 +25,31 @@ const statuses: ApplicationAvailability[] = [
   "unverified",
 ];
 
-export function ScholarshipDirectory({ programs }: { programs: Program[] }) {
-  const [category, setCategory] = useState("all");
-  const [query, setQuery] = useState("");
-  const [degree, setDegree] = useState("all");
-  const [status, setStatus] = useState("all");
-  const [sort, setSort] = useState<SortMode>("alpha");
+type InitialFilters = Record<string, string | string[] | undefined>;
+
+function first(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export function ScholarshipDirectory({
+  programs,
+  initialFilters,
+}: {
+  programs: Program[];
+  initialFilters: InitialFilters;
+}) {
+  const [category, setCategory] = useState(first(initialFilters.category) ?? "all");
+  const [query, setQuery] = useState(first(initialFilters.q) ?? "");
+  const [degree, setDegree] = useState(first(initialFilters.degree) ?? "all");
+  const [status, setStatus] = useState(first(initialFilters.status) ?? "all");
+  const [sort, setSort] = useState<SortMode>(first(initialFilters.sort) === "deadline" ? "deadline" : "alpha");
   const [page, setPage] = useState(1);
   const [today, setToday] = useState(FIXTURE_NOW);
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    setCategory(params.get("category") ?? "all");
-    setQuery(params.get("q") ?? "");
-    setDegree(params.get("degree") ?? "all");
-    setStatus(params.get("status") ?? "all");
-    setSort(params.get("sort") === "deadline" ? "deadline" : "alpha");
-    setHydrated(true);
-  }, []);
   useEffect(() => {
     const timer = window.setTimeout(() => setToday(new Date()), 0);
     return () => window.clearTimeout(timer);
   }, []);
   useEffect(() => {
-    if (!hydrated) return;
     const params = new URLSearchParams();
     if (category !== "all") params.set("category", category);
     if (query) params.set("q", query);
@@ -61,7 +61,7 @@ export function ScholarshipDirectory({ programs }: { programs: Program[] }) {
       "",
       `${window.location.pathname}${params.size ? `?${params}` : ""}`,
     );
-  }, [category, query, degree, status, sort, hydrated]);
+  }, [category, query, degree, status, sort]);
 
   const degrees = useMemo(() => [...undergraduateDegreePrograms].sort(), []);
   const filtered = useMemo(
@@ -249,7 +249,7 @@ export function ScholarshipDirectory({ programs }: { programs: Program[] }) {
             const availability = resolveApplicationAvailability(cycle, today);
             return (
               <Accordion.Item id={program.id} key={program.id}>
-                <Accordion.Heading>
+                <Accordion.Heading level={2}>
                   <Accordion.Trigger className="scholarship-accordion-trigger">
                     <span className="scholarship-accordion-main">
                       <strong>{program.name}</strong>
@@ -298,10 +298,18 @@ export function ScholarshipDirectory({ programs }: { programs: Program[] }) {
             );
           })}
         </Accordion>
+      ) : programs.length ? (
+        <div className="empty-state">
+          <h2>No matching scholarships</h2>
+          <p>Clear the filters to see all published scholarship programs.</p>
+          <Button type="button" variant="secondary" onPress={clearFilters}>
+            Clear filters
+          </Button>
+        </div>
       ) : (
         <div className="empty-state">
           <h2>No published programs</h2>
-          <p>Published SFAU scholarship content will appear here after it is loaded into Neon.</p>
+          <p>Verified scholarship information will appear here when SFAU publishes it.</p>
         </div>
       )}
       {visible.length < filtered.length && (

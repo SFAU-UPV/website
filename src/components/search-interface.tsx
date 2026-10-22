@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useId, useState } from "react";
 import { EmptyState } from "@/src/components/data-states";
-import type { Program } from "@/src/types/domain";
+import { services, type Program } from "@/src/types/domain";
 import { Button } from "@heroui/react";
 
 export function SearchInterface({
@@ -13,17 +13,20 @@ export function SearchInterface({
   programs: Program[];
   initialQuery?: string;
 }) {
-  const [query, setQuery] = useState(
-    () =>
-      initialQuery ||
-      (typeof window === "undefined"
-        ? ""
-        : (new URLSearchParams(window.location.search).get("q") ?? "")),
-  );
+  const [query, setQuery] = useState(initialQuery);
   const normalized = query.trim().toLowerCase();
-  const results = programs.filter((program) =>
-    `${program.name} ${program.description ?? program.summary}`.toLowerCase().includes(normalized),
-  );
+  const hasQuery = normalized.length > 0;
+  const serviceResults = hasQuery
+    ? services.filter((service) =>
+        `${service.name} ${service.description}`.toLowerCase().includes(normalized),
+      )
+    : [];
+  const programResults = hasQuery
+    ? programs.filter((program) =>
+        `${program.name} ${program.description ?? program.summary}`.toLowerCase().includes(normalized),
+      )
+    : [];
+  const resultCount = serviceResults.length + programResults.length;
   const resultId = useId();
 
   return (
@@ -47,14 +50,23 @@ export function SearchInterface({
           )}
         </div>
       </div>
-      <p className="result-summary" id={resultId} aria-live="polite">
-        {query
-          ? `${results.length} ${results.length === 1 ? "result" : "results"}`
-          : "Search results will appear here"}
+      <p className={hasQuery ? "result-summary" : "sr-only"} id={resultId} aria-live="polite">
+        {hasQuery
+          ? `${resultCount} ${resultCount === 1 ? "result" : "results"}`
+          : "Enter a term to search SFAU services and published programs."}
       </p>
-      {query && results.length > 0 ? (
+      {hasQuery && resultCount > 0 ? (
         <div className="program-list">
-          {results.map((program) => (
+          {serviceResults.map((service) => (
+            <Link className="card program-row" href={`/services/${service.slug}`} key={service.slug}>
+              <div>
+                <h2>{service.name}</h2>
+                <p>{service.description}</p>
+              </div>
+              <span aria-hidden="true">→</span>
+            </Link>
+          ))}
+          {programResults.map((program) => (
             <Link
               className="card program-row"
               href={
@@ -73,16 +85,12 @@ export function SearchInterface({
             </Link>
           ))}
         </div>
-      ) : (
+      ) : hasQuery ? (
         <EmptyState
-          title={query ? "No matching programs" : "Search the directory"}
-          message={
-            query
-              ? "Try another search term or browse all services."
-              : "Enter a term above to search published SFAU program content."
-          }
+          title="No matching information"
+          message="Try another search term or browse all services."
         />
-      )}
+      ) : null}
     </>
   );
 }

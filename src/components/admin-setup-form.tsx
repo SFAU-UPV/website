@@ -23,10 +23,15 @@ export function AdminSetupForm() {
       return;
     }
     setBusy(true);
-    const result = await authClient.signUp.email({ email, password, name });
-    if (result.error) setError(result.error.message ?? "Account creation failed.");
-    else setUserId(result.data?.user?.id ?? "");
-    setBusy(false);
+    try {
+      const result = await authClient.signUp.email({ email, password, name });
+      if (result.error) setError(result.error.message ?? "Account creation failed.");
+      else setUserId(result.data?.user?.id ?? "");
+    } catch {
+      setError("Could not reach the sign-in service. Check your connection and try again.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -75,7 +80,7 @@ export function AdminSetupForm() {
         {userId ? (
           <div className="admin-success" role="status">
             <p>
-              Account created. Add this user ID to <code>admin_profiles</code>:
+              Sign-in account created. Ask the SFAU database administrator to add this user ID to <code>admin_profiles</code> before using the workspace:
             </p>
             <code>{userId}</code>
           </div>
