@@ -13,7 +13,15 @@ import {
   type Program,
 } from "@/src/types/domain";
 import { StatusBadge } from "@/src/components/status-badge";
-import { Accordion, Button, Input, ListBox, Select } from "@heroui/react";
+import { formatProgramTitle } from "@/src/lib/format";
+import {
+  Accordion,
+  Button,
+  Input,
+  ListBox,
+  Select,
+  Tabs,
+} from "@heroui/react";
 
 type SortMode = "alpha" | "deadline";
 const pageSize = 6;
@@ -125,27 +133,23 @@ export function ScholarshipDirectory({
 
   return (
     <div data-testid="scholarship-directory">
-      <div className="directory-tabs" role="group" aria-label="Scholarship categories">
-        <button
-          className={category === "all" ? "active" : ""}
-          aria-pressed={category === "all"}
-          type="button"
-          onClick={() => chooseCategory("all")}
-        >
-          All
-        </button>
-        {scholarshipCategories.map((item) => (
-          <button
-            className={category === item.slug ? "active" : ""}
-            aria-pressed={category === item.slug}
-            type="button"
-            key={item.slug}
-            onClick={() => chooseCategory(item.slug)}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        className="directory-tabs"
+        aria-label="Scholarship categories"
+        selectedKey={category}
+        onSelectionChange={(key) => {
+          if (typeof key === "string") chooseCategory(key);
+        }}
+      >
+        <Tabs.List>
+          <Tabs.Tab id="all">All</Tabs.Tab>
+          {scholarshipCategories.map((item) => (
+            <Tabs.Tab id={item.slug} key={item.slug}>
+              {item.label}
+            </Tabs.Tab>
+          ))}
+        </Tabs.List>
+      </Tabs>
       <fieldset className="filters directory-filters">
         <legend className="sr-only">Filter and sort scholarship programs</legend>
           <label className="filter-search">
@@ -252,7 +256,7 @@ export function ScholarshipDirectory({
                 <Accordion.Heading level={2}>
                   <Accordion.Trigger className="scholarship-accordion-trigger">
                     <span className="scholarship-accordion-main">
-                      <strong>{program.name}</strong>
+                      <strong>{formatProgramTitle(program.name)}</strong>
                       <span className="scholarship-accordion-meta">
                         <small>
                           {cycle?.endsOn ? `Deadline: ${cycle.endsOn}` : "Dates to be announced"}
@@ -265,32 +269,36 @@ export function ScholarshipDirectory({
                 <Accordion.Panel>
                   <Accordion.Body>
                     <div className="scholarship-accordion-content">
-                      {program.benefits?.length ? (
-                        <section>
-                          <h3>Benefits</h3>
-                          <ul>
-                            {program.benefits.map((item) => (
-                              <li key={item}>{item}</li>
-                            ))}
-                          </ul>
-                        </section>
-                      ) : null}
-                      {program.degreePrograms?.length ? (
-                        <section>
-                          <h3>Applicable degree programs</h3>
-                          <ul>
-                            {program.degreePrograms.map((item) => (
-                              <li key={item}>{item}</li>
-                            ))}
-                          </ul>
-                        </section>
-                      ) : null}
-                      <Link
-                        className="button button-primary"
-                        href={`/services/scholarships/${program.slug}`}
-                      >
-                        View Details
-                      </Link>
+                      <div className="scholarship-accordion-details">
+                        {program.benefits?.length ? (
+                          <section>
+                            <h3>Benefits</h3>
+                            <ul>
+                              {program.benefits.map((item) => (
+                                <li key={item}>{item}</li>
+                              ))}
+                            </ul>
+                          </section>
+                        ) : null}
+                        {program.degreePrograms?.length ? (
+                          <section>
+                            <h3>Applicable degree programs</h3>
+                            <ul>
+                              {program.degreePrograms.map((item) => (
+                                <li key={item}>{item}</li>
+                              ))}
+                            </ul>
+                          </section>
+                        ) : null}
+                      </div>
+                      <div className="scholarship-accordion-action">
+                        <Link
+                          className="button button-primary"
+                          href={`/services/scholarships/${program.slug}`}
+                        >
+                          View Details
+                        </Link>
+                      </div>
                     </div>
                   </Accordion.Body>
                 </Accordion.Panel>

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { ProgramDetail } from "@/src/components/program-detail";
 import { getPublicProgramsResult } from "@/src/lib/content";
 import { ErrorState } from "@/src/components/data-states";
+import { formatProgramTitle } from "@/src/lib/format";
 
 export const instant = false;
 
@@ -36,7 +37,7 @@ export default async function OtherFinancialAssistanceDetailPage({
         { label: "Home", href: "/" },
         { label: "Services", href: "/services" },
         { label: "Other Financial Assistance", href: "/services/other-financial-assistance" },
-        { label: program.name },
+        { label: formatProgramTitle(program.name) },
       ]}
     />
   );

@@ -4,6 +4,7 @@ import { Accordion } from "@heroui/react";
 import Link from "next/link";
 import { StatusBadge } from "@/src/components/status-badge";
 import type { Program } from "@/src/types/domain";
+import { formatProgramTitle } from "@/src/lib/format";
 
 export function AssistanceDirectory({
   programs,
@@ -24,7 +25,7 @@ export function AssistanceDirectory({
           <Accordion.Heading>
             <Accordion.Trigger className="scholarship-accordion-trigger">
               <span className="scholarship-accordion-main">
-                <strong>{program.name}</strong>
+                <strong>{formatProgramTitle(program.name)}</strong>
                 <span className="scholarship-accordion-meta">
                   <small>Dates to be announced</small>
                   <StatusBadge status="unverified" />
@@ -35,37 +36,41 @@ export function AssistanceDirectory({
           <Accordion.Panel>
             <Accordion.Body>
               <div className="scholarship-accordion-content">
-                {program.benefits?.length ? (
-                  <section>
-                    <h3>Benefits</h3>
-                    <ul>
-                      {program.benefits.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                  </section>
-                ) : null}
-                {program.degreePrograms?.length ? (
-                  <section>
-                    <h3>Applicable degree programs</h3>
-                    <ul>
-                      {program.degreePrograms.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                  </section>
-                ) : null}
-                {!program.benefits?.length && !program.degreePrograms?.length ? (
-                  <p>
-                    Program details and application announcements will appear here when available.
-                  </p>
-                ) : null}
-                <Link
-                  className="button button-primary"
-                  href={`/services/other-financial-assistance/${program.slug}`}
-                >
-                  View Details
-                </Link>
+                <div className="scholarship-accordion-details">
+                  {program.benefits?.length ? (
+                    <section>
+                      <h3>Benefits</h3>
+                      <ul>
+                        {program.benefits.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </section>
+                  ) : null}
+                  {program.degreePrograms?.length ? (
+                    <section>
+                      <h3>Applicable degree programs</h3>
+                      <ul>
+                        {program.degreePrograms.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </section>
+                  ) : null}
+                  {!program.benefits?.length && !program.degreePrograms?.length ? (
+                    <p>
+                      Program details and application announcements will appear here when available.
+                    </p>
+                  ) : null}
+                </div>
+                <div className="scholarship-accordion-action">
+                  <Link
+                    className="button button-primary"
+                    href={`/services/other-financial-assistance/${program.slug}`}
+                  >
+                    View Details
+                  </Link>
+                </div>
               </div>
             </Accordion.Body>
           </Accordion.Panel>

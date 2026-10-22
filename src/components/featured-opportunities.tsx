@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Accordion } from "@heroui/react";
 import { getPrimaryCycle, resolveApplicationAvailability, type Program } from "@/src/types/domain";
+import { formatProgramTitle } from "@/src/lib/format";
 import { StatusBadge } from "@/src/components/status-badge";
 
 export function FeaturedOpportunities({ programs }: { programs: Program[] }) {
@@ -15,7 +16,7 @@ export function FeaturedOpportunities({ programs }: { programs: Program[] }) {
             <Accordion.Heading>
               <Accordion.Trigger className="scholarship-accordion-trigger">
                 <span className="scholarship-accordion-main">
-                  <strong>{program.name}</strong>
+                  <strong>{formatProgramTitle(program.name)}</strong>
                   <span className="scholarship-accordion-meta">
                     <small>
                       {cycle?.endsOn ? `Deadline: ${cycle.endsOn}` : "Dates to be announced"}

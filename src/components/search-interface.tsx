@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useId, useState } from "react";
 import { EmptyState } from "@/src/components/data-states";
 import { services, type Program } from "@/src/types/domain";
+import { formatProgramTitle } from "@/src/lib/format";
 import { Button } from "@heroui/react";
 
 export function SearchInterface({
@@ -78,7 +79,7 @@ export function SearchInterface({
               key={program.id}
             >
               <div>
-                <h2>{program.name}</h2>
+                <h2>{formatProgramTitle(program.name)}</h2>
                 {program.summary ? <p>{program.summary}</p> : null}
               </div>
               <span aria-hidden="true">→</span>

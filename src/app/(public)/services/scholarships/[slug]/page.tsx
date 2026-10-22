@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { ProgramDetail } from "@/src/components/program-detail";
 import { getPublicProgramsResult } from "@/src/lib/content";
 import { ErrorState } from "@/src/components/data-states";
+import { formatProgramTitle } from "@/src/lib/format";
 
 export const instant = false;
 
@@ -26,7 +27,7 @@ export default async function ScholarshipDetailPage({
         { label: "Home", href: "/" },
         { label: "Services", href: "/services" },
         { label: "Scholarships", href: "/services/scholarships" },
-        { label: program.name },
+        { label: formatProgramTitle(program.name) },
       ]}
     />
   );

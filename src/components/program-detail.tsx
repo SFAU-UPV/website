@@ -1,12 +1,11 @@
 import { Breadcrumbs } from "@/src/components/breadcrumbs";
-import { StatusBadge } from "@/src/components/status-badge";
 import {
   canApply,
   getPrimaryCycle,
-  getProgramCategories,
   resolveApplicationAvailability,
   type Program,
 } from "@/src/types/domain";
+import { formatProgramTitle } from "@/src/lib/format";
 
 const availabilityCopy = {
   upcoming: "This opportunity is not open yet. Check the opening date.",
@@ -45,15 +44,15 @@ export function ProgramDetail({
   const overview = description || summary;
   return (
     <>
+      <section className="page-intro">
+        <div className="container">
+          <h1>{formatProgramTitle(program.name)}</h1>
+        </div>
+      </section>
       <Breadcrumbs items={breadcrumbs} />
       <section className="section">
         <div className="container detail-layout">
           <article>
-            <div className="section-heading">
-              <h1>{program.name}</h1>
-              <p className="program-categories">{getProgramCategories(program).join(" · ")}</p>
-              <StatusBadge status={availability} />
-            </div>
             <div className={`availability-panel availability-${availability}`}>
               <strong>
                 {availability === "open"
