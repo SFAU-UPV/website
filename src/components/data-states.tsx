@@ -6,6 +6,11 @@ export function LoadingState({ label = "Loading content" }: { label?: string }) 
       <Skeleton className="loading-skeleton loading-skeleton--title" />
       <Skeleton className="loading-skeleton loading-skeleton--line" />
       <Skeleton className="loading-skeleton loading-skeleton--line loading-skeleton--line-short" />
+      <div className="loading-skeleton-grid" aria-hidden="true">
+        {Array.from({ length: 6 }, (_, index) => (
+          <Skeleton className="loading-skeleton loading-skeleton--card" key={index} />
+        ))}
+      </div>
     </div>
   );
 }

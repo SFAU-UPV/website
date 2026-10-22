@@ -33,10 +33,6 @@ export default async function HomePage() {
             </p>
           </div>
           <HeroActions />
-          <div className="hero-note">
-            <span>Start with what you need today.</span>
-            <span>Application availability is shown only after SFAU verification.</span>
-          </div>
         </div>
       </section>
       <section className="support-rail" aria-label="Student support categories">
