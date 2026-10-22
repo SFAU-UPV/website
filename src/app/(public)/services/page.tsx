@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Breadcrumbs } from "@/src/components/breadcrumbs";
 import { getPublicServices } from "@/src/lib/content";
+import { siteConfig } from "@/src/lib/constants";
 
 const serviceImages: Record<string, string> = {
   "slas-online": "/services/slas-online.jpg",
@@ -18,6 +19,7 @@ export default function ServicesPage() {
       <section className="page-intro">
         <div className="container">
           <h1>Our services</h1>
+          <p>Official scholarships, assistance, and student support information from OSA-SFAU.</p>
         </div>
       </section>
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Services" }]} />
@@ -52,6 +54,15 @@ export default function ServicesPage() {
                 </div>
               </Link>
             ))}
+            <aside className="service-directory-note">
+              <span className="service-directory-note-label">Need help choosing?</span>
+              <h3>Ask OSA-SFAU about the right support.</h3>
+              <p>
+                Contact the Scholarships and Financial Assistance Unit if you are unsure which
+                service fits your situation.
+              </p>
+              <a href={`mailto:${siteConfig.contact.email}`}>{siteConfig.contact.email}</a>
+            </aside>
           </div>
         </div>
       </section>
