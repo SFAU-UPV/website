@@ -866,7 +866,91 @@ select:focus-visible {
   width: 190px;
 }
 .search-page {
-  max-width: 780px;
+  max-width: none;
+}
+.search-page .search-filters {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+}
+.search-page .search-filters .filter-search {
+  grid-column: auto;
+}
+.search-page .search-filters .clear-filters {
+  min-height: 2.75rem;
+}
+.search-results {
+  display: grid;
+  gap: 1.25rem;
+}
+.search-result-section h2 {
+  margin: 0 0 0.4rem;
+  color: var(--maroon-900);
+  font-size: 1rem;
+}
+.search-result-list {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.search-result-list::before,
+.search-result-list::after,
+.search-result-list > li + li::before {
+  position: absolute;
+  right: 0.15rem;
+  left: 0.15rem;
+  border-top: 1px solid var(--line);
+  content: "";
+  pointer-events: none;
+}
+.search-result-list::before {
+  top: 0;
+}
+.search-result-list::after {
+  bottom: 0;
+}
+.search-result-list > li {
+  position: relative;
+  list-style: none;
+}
+.search-result-list > li + li::before {
+  top: 0;
+}
+.search-result-item {
+  display: flex;
+  width: 100%;
+  min-height: 4rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 0.15rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: none;
+}
+.search-result-item strong {
+  display: block;
+  margin: 0;
+  color: var(--maroon-900);
+  font: 700 1.05rem/1.35 var(--font-sans);
+}
+.search-result-item > span > span {
+  display: block;
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+.search-result-item:hover strong,
+.search-result-item:focus-visible strong {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.search-result-item:focus-visible {
+  outline-offset: -3px;
 }
 .search-form {
   margin-bottom: 2rem;
@@ -2468,10 +2552,9 @@ select:focus-visible {
   color: white;
 }
 .service-detail-content {
-  width: calc(100% - 8rem);
+  width: 100%;
   max-width: none;
-  margin-left: 4rem;
-  margin-right: 4rem;
+  margin-inline: 0;
 }
 .service-overview {
   display: grid;
@@ -3882,13 +3965,13 @@ select:focus-visible {
 
 button:not(.menu-button):not(.carousel-dot):not(.scholarship-accordion-trigger):not(
     .program-list-row
-  ) {
+  ):not(.search-result-item) {
   box-shadow: 0 4px 12px rgba(45, 25, 10, 0.1);
 }
 
 button:not(.menu-button):not(.carousel-dot):not(.scholarship-accordion-trigger):not(
     .program-list-row
-  ):hover {
+  ):not(.search-result-item):hover {
   box-shadow: 0 6px 16px rgba(45, 25, 10, 0.16);
 }
 
@@ -4042,6 +4125,35 @@ iframe {
 
 /* Mobile finishing rules for public service and program surfaces. */
 @media (max-width: 720px) {
+  .other-assistance-programs > h2 {
+    padding-inline: 1rem;
+  }
+
+  .service-detail-content .other-assistance-programs .program-list-group {
+    width: calc(100% - 2rem);
+    margin-inline: 1rem;
+    overflow: hidden;
+    border: 1px solid #cfc5ba;
+    border-radius: 0.75rem;
+    background: var(--paper);
+  }
+
+  .service-detail-content .other-assistance-programs .program-list-group > li + li {
+    position: relative;
+    border-top: 0;
+  }
+
+  .service-detail-content .other-assistance-programs .program-list-group > li + li::before {
+    position: absolute;
+    top: 0;
+    right: clamp(0.75rem, 3.5vw, 1rem);
+    left: clamp(0.75rem, 3.5vw, 1rem);
+    display: block;
+    border-top: 1px solid #cfc5ba;
+    content: "";
+    pointer-events: none;
+  }
+
   .footer-inner {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -4066,7 +4178,7 @@ iframe {
 
   .service-detail-content {
     min-width: 0;
-    padding-inline: 0.5rem;
+    padding-inline: 0;
   }
 
   .program-list-row {
@@ -4080,6 +4192,11 @@ iframe {
 /* Service pages use spacing between sections instead of separator rules. */
 .service-detail-content {
   min-width: 0;
+  width: 100%;
+  margin-inline: 0;
+}
+.breadcrumbs + .section {
+  padding-top: 1.25rem;
 }
 .service-detail-content :is(p, li, a, h2, strong) {
   min-width: 0;
