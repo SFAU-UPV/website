@@ -40,7 +40,15 @@ export function SiteHeader() {
               </label>
               <input id="header-search-input" name="q" type="search" placeholder="Search" />
               <button type="submit">
-                <span aria-hidden="true">⌕</span>
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+                  <circle cx="10.8" cy="10.8" r="6.4" stroke="currentColor" strokeWidth="2" />
+                  <path
+                    d="m15.5 15.5 4.1 4.1"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
                 <span className="sr-only">Search</span>
               </button>
             </form>

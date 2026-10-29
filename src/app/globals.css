@@ -190,6 +190,17 @@ select:focus-visible {
   font-size: 1.2rem;
   cursor: pointer;
   touch-action: manipulation;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-color: var(--green-800);
+  background: var(--green-800);
+}
+.menu-button svg {
+  display: block;
+  width: 1.35rem;
+  height: 1.35rem;
 }
 .mobile-menu {
   position: absolute;
@@ -222,7 +233,7 @@ select:focus-visible {
 }
 .footer-inner {
   display: grid;
-  grid-template-columns: 0.8fr 0.8fr 1.5fr;
+  grid-template-columns: 0.8fr 0.8fr 1.1fr 1.3fr;
   align-items: start;
   min-height: 280px;
   padding-block: 3.25rem;
@@ -289,9 +300,8 @@ select:focus-visible {
   gap: 1.25rem;
 }
 .footer-contact address {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem 1.25rem;
+  display: grid;
+  gap: 0.6rem;
   color: #fff7ee;
   font-style: normal;
   font-size: 0.9rem;
@@ -302,12 +312,13 @@ select:focus-visible {
   overflow-wrap: anywhere;
 }
 .footer-contact address > span:first-child {
-  flex-basis: 100%;
   max-width: 28rem;
 }
 .footer-contact address > span:last-child {
-  flex-basis: 100%;
   color: #f9e6c8;
+}
+.footer-brand-column {
+  min-width: 0;
 }
 .footer-bottom {
   border-top: 1px solid rgba(255, 255, 255, 0.2);
@@ -1557,6 +1568,10 @@ select:focus-visible {
 .header-search button:hover {
   background: white;
 }
+.header-search button svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
 @media (max-width: 720px) {
   .header-inner,
   .footer-inner {
@@ -2141,7 +2156,8 @@ select:focus-visible {
 .program-list-row {
   display: flex;
   width: 100%;
-  min-height: 6.75rem;
+  min-height: clamp(5rem, 10vw, 6.75rem);
+  height: auto;
   align-items: center;
   justify-content: space-between;
   gap: 1.25rem;
@@ -2306,6 +2322,7 @@ select:focus-visible {
   margin: 0;
   color: var(--maroon-900);
   font-size: clamp(1.2rem, 2vw, 1.6rem);
+  font-weight: 700;
 }
 .program-dialog-close {
   display: grid;
@@ -2320,6 +2337,10 @@ select:focus-visible {
   font-size: 1.75rem;
   line-height: 1;
   cursor: pointer;
+}
+.program-dialog-close svg {
+  width: 1.3rem;
+  height: 1.3rem;
 }
 .program-dialog-close:hover {
   background: #f8f2eb;
@@ -2454,7 +2475,7 @@ select:focus-visible {
 }
 .service-overview {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
   gap: 2rem;
   margin-bottom: 2.25rem;
 }
@@ -3992,6 +4013,11 @@ iframe {
 
   .footer-contact {
     grid-column: auto;
+    order: 0;
+  }
+
+  .footer-brand-column {
+    order: 0;
   }
 
   .footer-bottom .container {
@@ -4012,6 +4038,75 @@ iframe {
     width: 100%;
     margin-inline: 0;
   }
+}
+
+/* Mobile finishing rules for public service and program surfaces. */
+@media (max-width: 720px) {
+  .footer-inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .footer-contact {
+    order: 0;
+  }
+
+  .footer-brand-column {
+    order: 0;
+  }
+
+  .directory-filter-mobile-row {
+    align-items: end;
+  }
+
+  .directory-filters .filter-search .input,
+  .directory-filters .mobile-filters-toggle {
+    height: 2.75rem;
+    min-height: 2.75rem;
+  }
+
+  .service-detail-content {
+    min-width: 0;
+    padding-inline: 0.5rem;
+  }
+
+  .program-list-row {
+    min-height: clamp(5rem, 18vw, 6rem);
+    height: auto;
+    gap: clamp(0.5rem, 2vw, 0.75rem);
+    padding: clamp(0.75rem, 3.5vw, 1rem);
+  }
+}
+
+/* Service pages use spacing between sections instead of separator rules. */
+.service-detail-content {
+  min-width: 0;
+}
+.service-detail-content :is(p, li, a, h2, strong) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.service-detail-content .prose-section + .prose-section {
+  border-top: 0;
+  padding-top: 0;
+}
+.service-detail-content .service-overview-note {
+  border-top: 0;
+}
+.service-detail-content .service-program-list {
+  border-top: 0;
+}
+.service-detail-content .service-program-row {
+  border-bottom: 0;
+}
+.service-detail-content .service-requirements-list li {
+  border-bottom: 0;
+}
+.service-detail-content .service-facts-grid > div {
+  border-top: 0;
+}
+.service-detail-content .service-reminders {
+  border-top: 0;
+  padding-top: 0;
 }
 
 @media (max-width: 420px) {

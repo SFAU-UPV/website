@@ -32,13 +32,7 @@ export function SiteFooter() {
           </a>
         </div>
         <div className="footer-column footer-contact">
-          <div className="footer-brand">
-            <Image src="/upv-logo.jpg" alt="" width={48} height={48} />
-            <div>
-              <strong>{siteConfig.institution}</strong>
-              <span>{siteConfig.name}</span>
-            </div>
-          </div>
+          <h2>Contact</h2>
           <address>
             <span>{siteConfig.contact.office}</span>
             <a href={`mailto:${siteConfig.contact.email}`}>{siteConfig.contact.email}</a>
@@ -48,12 +42,23 @@ export function SiteFooter() {
             <span>{siteConfig.contact.hours}</span>
           </address>
         </div>
+        <div className="footer-column footer-brand-column">
+          <div className="footer-brand">
+            <Image src="/upv-logo.jpg" alt="" width={48} height={48} />
+            <div>
+              <strong>{siteConfig.institution}</strong>
+              <span>{siteConfig.name}</span>
+            </div>
+          </div>
+        </div>
       </div>
       <div className="footer-bottom">
         <div className="container">
           <span>Official information from OSA-SFAU, UP Visayas.</span>
           <div className="footer-bottom-links">
-            <a href="https://upv.edu.ph/" target="_blank" rel="noreferrer">upv.edu.ph</a>
+            <a href="https://upv.edu.ph/" target="_blank" rel="noreferrer">
+              upv.edu.ph
+            </a>
             <DeveloperCredit />
           </div>
         </div>

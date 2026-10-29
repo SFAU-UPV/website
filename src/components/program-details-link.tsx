@@ -67,7 +67,14 @@ export function ProgramDetailsLink({
             onClick={() => dialogRef.current?.close()}
             autoFocus
           >
-            <span aria-hidden="true">×</span>
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+              <path
+                d="m6 6 12 12M18 6 6 18"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
             <span className="sr-only">Close program details</span>
           </button>
         </div>
