@@ -8,16 +8,20 @@ export type AdminActionState = {
   ok: boolean;
   message?: string;
   error?: string;
+  fieldErrors?: Record<string, string>;
   program?: Record<string, unknown>;
 };
 type Row = Record<string, unknown>;
 type Sql = ReturnType<typeof getNeonSql>;
 const text = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
-const list = (form: FormData, key: string) =>
-  text(form, key)
-    .split(/\r?\n/)
+const list = (form: FormData, key: string) => {
+  const repeated = form.getAll(`${key}_items`).filter((item): item is string => typeof item === "string");
+  const values = repeated.length ? repeated : [text(form, key)];
+  return values
+    .flatMap((item) => item.split(/\r?\n/))
     .map((item) => item.trim())
     .filter(Boolean);
+};
 const nullable = (value: string) => value || null;
 function sanitize(value: string) {
   return value
@@ -132,6 +136,20 @@ export async function getAdminSnapshot() {
   ]);
   return { programs, announcements, services, categories, audits };
 }
+export async function getAdminProgramEditorData(id?: string) {
+  const { sql } = await requireAdmin();
+  const [programs, services, categories] = await Promise.all([
+    id
+      ? sql.query(
+          "select p.*, sc.slug as service_slug, sc.name as service_name, coalesce(array_agg(distinct sh.slug) filter (where sh.slug is not null), '{}') as category_slugs, coalesce(jsonb_agg(distinct ac) filter (where ac.id is not null), '[]') as application_cycles from programs p left join service_categories sc on sc.id=p.service_category_id left join program_category_links pcl on pcl.program_id=p.id left join scholarship_categories sh on sh.id=pcl.category_id left join application_cycles ac on ac.program_id=p.id and ac.archived_at is null where p.id=$1 group by p.id, sc.slug, sc.name",
+          [id],
+        )
+      : Promise.resolve([]),
+    sql.query("select id,slug,name from service_categories order by name"),
+    sql.query("select id,slug,name from scholarship_categories order by name"),
+  ]);
+  return { program: programs[0] as Row | undefined, services, categories };
+}
 export async function getAdminProgramPreview(id: string) {
   const { sql } = await requireAdmin();
   const rows = await sql.query(
@@ -215,6 +233,14 @@ export async function saveProgramAction(form: FormData): Promise<AdminActionStat
       program: updatedProgram,
     };
   } catch (error) {
+    const databaseError = error as { code?: string; constraint?: string };
+    if (databaseError.code === "23505" && databaseError.constraint?.includes("slug")) {
+      return {
+        ok: false,
+        error: "That URL is already used by another program. Choose a different slug.",
+        fieldErrors: { slug: "This URL is already in use." },
+      };
+    }
     return {
       ok: false,
       error: error instanceof Error ? error.message : "Program could not be saved.",

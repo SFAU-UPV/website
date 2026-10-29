@@ -4,7 +4,10 @@ import { getAdminSnapshot } from "@/src/lib/admin";
 
 export const instant = false;
 
-export default async function AdminPage() {
+export default async function AdminPage({ searchParams }: { searchParams: Promise<{ tab?: string; newCycleFor?: string }> }) {
+  const params = await searchParams;
+  const allowedTabs = ["overview", "programs", "cycles", "announcements", "audit"] as const;
+  const initialTab = allowedTabs.includes(params.tab as typeof allowedTabs[number]) ? params.tab as typeof allowedTabs[number] : "overview";
   let snapshot;
   let loadError: unknown;
   try {
@@ -23,7 +26,7 @@ export default async function AdminPage() {
             </div>
             <AdminSignOutButton />
           </div>
-          <AdminConsole snapshot={snapshot} />
+          <AdminConsole snapshot={snapshot} initialTab={initialTab} newCycleFor={params.newCycleFor} />
         </div>
       </section>
     );
