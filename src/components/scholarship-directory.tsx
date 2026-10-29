@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { ProgramList } from "@/src/components/program-list";
 import { useEffect, useMemo, useState } from "react";
 import { scholarshipCategories } from "@/src/lib/constants";
 import {
@@ -12,16 +12,8 @@ import {
   type ApplicationAvailability,
   type Program,
 } from "@/src/types/domain";
-import { StatusBadge } from "@/src/components/status-badge";
-import { formatProgramTitle } from "@/src/lib/format";
-import {
-  Accordion,
-  Button,
-  Input,
-  ListBox,
-  Select,
-  Tabs,
-} from "@heroui/react";
+
+import { Button, Input, ListBox, Select, Tabs } from "@heroui/react";
 
 type SortMode = "alpha" | "deadline";
 const pageSize = 6;
@@ -50,9 +42,12 @@ export function ScholarshipDirectory({
   const [query, setQuery] = useState(first(initialFilters.q) ?? "");
   const [degree, setDegree] = useState(first(initialFilters.degree) ?? "all");
   const [status, setStatus] = useState(first(initialFilters.status) ?? "all");
-  const [sort, setSort] = useState<SortMode>(first(initialFilters.sort) === "deadline" ? "deadline" : "alpha");
+  const [sort, setSort] = useState<SortMode>(
+    first(initialFilters.sort) === "deadline" ? "deadline" : "alpha",
+  );
   const [page, setPage] = useState(1);
   const [today, setToday] = useState(FIXTURE_NOW);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   useEffect(() => {
     const timer = window.setTimeout(() => setToday(new Date()), 0);
     return () => window.clearTimeout(timer);
@@ -152,17 +147,41 @@ export function ScholarshipDirectory({
       </Tabs>
       <fieldset className="filters directory-filters">
         <legend className="sr-only">Filter and sort scholarship programs</legend>
+        <div className="directory-filter-mobile-row">
           <label className="filter-search">
-          <span>Search by name</span>
+            <span>Search by name</span>
             <Input
-            className="input"
-            value={query}
-            onChange={(event) => chooseQuery(event.target.value)}
-            placeholder="Search scholarships"
-          />
-        </label>
-        <label className="filter-select">
-          <span>Degree program</span>
+              className="input"
+              value={query}
+              onChange={(event) => chooseQuery(event.target.value)}
+              placeholder="Search scholarships"
+            />
+          </label>
+          <button
+            className="mobile-filters-toggle"
+            type="button"
+            aria-expanded={filtersOpen}
+            aria-controls="directory-filter-options"
+            onClick={() => setFiltersOpen((open) => !open)}
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M4 5h16l-6.25 7.1v5.2l-3.5 1.9v-7.1L4 5Z"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Filters
+          </button>
+        </div>
+        <div
+          className={`directory-filter-options${filtersOpen ? " is-open" : ""}`}
+          id="directory-filter-options"
+        >
+          <label className="filter-select">
+            <span>Degree program</span>
             <Select
               aria-label="Degree program"
               className="filter-control"
@@ -184,9 +203,9 @@ export function ScholarshipDirectory({
                 </ListBox>
               </Select.Popover>
             </Select>
-        </label>
-        <label className="filter-select">
-          <span>Application status</span>
+          </label>
+          <label className="filter-select">
+            <span>Application status</span>
             <Select
               aria-label="Application status"
               className="filter-control"
@@ -210,9 +229,9 @@ export function ScholarshipDirectory({
                 </ListBox>
               </Select.Popover>
             </Select>
-        </label>
-        <label className="filter-select">
-          <span>Sort by</span>
+          </label>
+          <label className="filter-select">
+            <span>Sort by</span>
             <Select
               aria-label="Sort by"
               className="filter-control"
@@ -230,16 +249,17 @@ export function ScholarshipDirectory({
                 </ListBox>
               </Select.Popover>
             </Select>
-        </label>
-        <Button
-          className="clear-filters"
-          type="button"
-          variant="primary"
-          size="md"
-          onPress={clearFilters}
-        >
-          Clear filters
-        </Button>
+          </label>
+          <Button
+            className="clear-filters"
+            type="button"
+            variant="primary"
+            size="md"
+            onPress={clearFilters}
+          >
+            Clear filters
+          </Button>
+        </div>
       </fieldset>
       <div className="result-bar" aria-live="polite">
         <strong>
@@ -247,65 +267,7 @@ export function ScholarshipDirectory({
         </strong>
       </div>{" "}
       {visible.length ? (
-        <Accordion className="scholarship-accordions" hideSeparator>
-          {visible.map((program) => {
-            const cycle = getPrimaryCycle(program);
-            const availability = resolveApplicationAvailability(cycle, today);
-            return (
-              <Accordion.Item id={program.id} key={program.id}>
-                <Accordion.Heading level={2}>
-                  <Accordion.Trigger className="scholarship-accordion-trigger">
-                    <span className="scholarship-accordion-main">
-                      <strong>{formatProgramTitle(program.name)}</strong>
-                      <span className="scholarship-accordion-meta">
-                        <small>
-                          {cycle?.endsOn ? `Deadline: ${cycle.endsOn}` : "Dates to be announced"}
-                        </small>
-                        <StatusBadge status={availability} />
-                      </span>
-                    </span>
-                  </Accordion.Trigger>
-                </Accordion.Heading>
-                <Accordion.Panel>
-                  <Accordion.Body>
-                    <div className="scholarship-accordion-content">
-                      <div className="scholarship-accordion-details">
-                        {program.benefits?.length ? (
-                          <section>
-                            <h3>Benefits</h3>
-                            <ul>
-                              {program.benefits.map((item) => (
-                                <li key={item}>{item}</li>
-                              ))}
-                            </ul>
-                          </section>
-                        ) : null}
-                        {program.degreePrograms?.length ? (
-                          <section>
-                            <h3>Applicable degree programs</h3>
-                            <ul>
-                              {program.degreePrograms.map((item) => (
-                                <li key={item}>{item}</li>
-                              ))}
-                            </ul>
-                          </section>
-                        ) : null}
-                      </div>
-                      <div className="scholarship-accordion-action">
-                        <Link
-                          className="button button-primary"
-                          href={`/services/scholarships/${program.slug}`}
-                        >
-                          View Details
-                        </Link>
-                      </div>
-                    </div>
-                  </Accordion.Body>
-                </Accordion.Panel>
-              </Accordion.Item>
-            );
-          })}
-        </Accordion>
+        <ProgramList programs={visible} today={today} />
       ) : programs.length ? (
         <div className="empty-state">
           <h2>No matching scholarships</h2>

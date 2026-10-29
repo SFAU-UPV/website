@@ -71,9 +71,9 @@ export default function AboutPage() {
                       <Image
                         src={`/about/team/${member.image}`}
                         alt={`${member.name}, SFAU staff`}
-                        width={120}
-                        height={120}
-                        sizes="(max-width: 720px) 96px, 120px"
+                        width={1414}
+                        height={2000}
+                        sizes="(max-width: 720px) 96px, (min-width: 1600px) 192px, (min-width: 1000px) 12vw, 120px"
                       />
                     </div>
                     <div className="team-card-content">
@@ -88,35 +88,35 @@ export default function AboutPage() {
             </div>
             <div className="prose-section" id="contact">
               <h2>Contact information</h2>
-              <div className="card">
-                <p>
-                  <strong>Email</strong>
-                  <br />
-                  <a className="text-link" href={`mailto:${siteConfig.contact.email}`}>
-                    {siteConfig.contact.email}
-                  </a>
-                </p>
-                <p>
-                  <strong>Telephone</strong>
-                  <br />
-                  <a
-                    className="text-link"
-                    href={`tel:${siteConfig.contact.phone.replace(/[^0-9+]/g, "")}`}
-                  >
-                    {siteConfig.contact.phone}
-                  </a>
-                </p>
-                <p>
-                  <strong>Office</strong>
-                  <br />
-                  {siteConfig.contact.office}
-                </p>
-                <p>
-                  <strong>Office hours</strong>
-                  <br />
-                  {siteConfig.contact.hours}
-                </p>
-              </div>
+              <dl className="about-contact-details">
+                <div>
+                  <dt>Email</dt>
+                  <dd>
+                    <a className="text-link" href={`mailto:${siteConfig.contact.email}`}>
+                      {siteConfig.contact.email}
+                    </a>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Telephone</dt>
+                  <dd>
+                    <a
+                      className="text-link"
+                      href={`tel:${siteConfig.contact.phone.replace(/[^0-9+]/g, "")}`}
+                    >
+                      {siteConfig.contact.phone}
+                    </a>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Office</dt>
+                  <dd>{siteConfig.contact.office}</dd>
+                </div>
+                <div>
+                  <dt>Office hours</dt>
+                  <dd>{siteConfig.contact.hours}</dd>
+                </div>
+              </dl>
             </div>
           </article>
         </div>

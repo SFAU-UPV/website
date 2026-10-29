@@ -15,7 +15,9 @@ type Row = Record<string, unknown>;
 type Sql = ReturnType<typeof getNeonSql>;
 const text = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
 const list = (form: FormData, key: string) => {
-  const repeated = form.getAll(`${key}_items`).filter((item): item is string => typeof item === "string");
+  const repeated = form
+    .getAll(`${key}_items`)
+    .filter((item): item is string => typeof item === "string");
   const values = repeated.length ? repeated : [text(form, key)];
   return values
     .flatMap((item) => item.split(/\r?\n/))
@@ -108,13 +110,16 @@ function programPayload(form: FormData) {
     eligibility: list(form, "eligibility").map(sanitize),
     requirements: list(form, "requirements").map(sanitize),
     benefits: list(form, "benefits").map(sanitize),
-    degree_programs: Array.from(new Set(
-      form.getAll("degree_programs")
-        .filter((entry): entry is string => typeof entry === "string")
-        .flatMap((entry) => entry.split(/\r?\n/))
-        .map((entry) => entry.trim())
-        .filter(Boolean),
-    )),
+    degree_programs: Array.from(
+      new Set(
+        form
+          .getAll("degree_programs")
+          .filter((entry): entry is string => typeof entry === "string")
+          .flatMap((entry) => entry.split(/\r?\n/))
+          .map((entry) => entry.trim())
+          .filter(Boolean),
+      ),
+    ),
     application_process: list(form, "application_process").map(sanitize),
   };
 }
@@ -229,7 +234,11 @@ export async function saveProgramAction(form: FormData): Promise<AdminActionStat
     revalidatePath("/services/student-assistantship");
     return {
       ok: true,
-      message: id ? "Program updated." : payload.publication_status === "published" ? "Program saved and published." : "Program saved as draft.",
+      message: id
+        ? "Program updated."
+        : payload.publication_status === "published"
+          ? "Program saved and published."
+          : "Program saved as draft.",
       program: updatedProgram,
     };
   } catch (error) {
@@ -280,7 +289,8 @@ export async function changeProgramStateAction(form: FormData): Promise<AdminAct
     revalidatePath("/");
     revalidatePath("/services");
     revalidatePath("/services/scholarships");
-    revalidatePath(`/services/scholarships/${before.slug}`);
+    revalidatePath("/services/other-financial-assistance");
+    revalidatePath("/search");
     return { ok: true, message: `Program ${next}.` };
   } catch (error) {
     return {
@@ -298,10 +308,12 @@ export async function saveCycleAction(form: FormData): Promise<AdminActionState>
       closes = text(form, "close_at");
     if (!programId) throw new Error("Choose a program.");
     if (id) {
-      const existing = (await sql.query(
-        "select program_id from application_cycles where id=$1 and archived_at is null",
-        [id],
-      ))[0];
+      const existing = (
+        await sql.query(
+          "select program_id from application_cycles where id=$1 and archived_at is null",
+          [id],
+        )
+      )[0];
       if (!existing) throw new Error("Application cycle not found.");
       if (String(existing.program_id) !== programId)
         throw new Error("An application cycle cannot be moved to another program.");
@@ -326,7 +338,9 @@ export async function saveCycleAction(form: FormData): Promise<AdminActionState>
       text(form, "link_type") || null,
       verificationState,
       override || null,
-      verified ? JSON.stringify({ verified_by: String(user.id), verified_at: new Date().toISOString() }) : "{}",
+      verified
+        ? JSON.stringify({ verified_by: String(user.id), verified_at: new Date().toISOString() })
+        : "{}",
     ];
     const row = id
       ? (
@@ -355,8 +369,8 @@ export async function saveCycleAction(form: FormData): Promise<AdminActionState>
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/services/scholarships");
-    const program = (await sql.query("select slug from programs where id=$1", [programId]))[0];
-    if (program?.slug) revalidatePath(`/services/scholarships/${program.slug}`);
+    revalidatePath("/services/other-financial-assistance");
+    revalidatePath("/search");
     return { ok: true, message: id ? "Application cycle updated." : "Application cycle created." };
   } catch (error) {
     return {
@@ -370,26 +384,33 @@ export async function archiveCycleAction(form: FormData): Promise<AdminActionSta
     const { sql, user } = await requireAdmin();
     const id = text(form, "id");
     if (!id) throw new Error("Choose an application cycle.");
-    const before = (await sql.query(
-      "select id,program_id,verification_state,archived_at from application_cycles where id=$1 and archived_at is null",
-      [id],
-    ))[0];
+    const before = (
+      await sql.query(
+        "select id,program_id,verification_state,archived_at from application_cycles where id=$1 and archived_at is null",
+        [id],
+      )
+    )[0];
     if (!before) throw new Error("Application cycle not found.");
-    const after = (await sql.query(
-      "update application_cycles set archived_at=now(),verification_state='unverified',updated_at=now() where id=$1 and archived_at is null returning id,program_id,verification_state,archived_at",
-      [id],
-    ))[0];
+    const after = (
+      await sql.query(
+        "update application_cycles set archived_at=now(),verification_state='unverified',updated_at=now() where id=$1 and archived_at is null returning id,program_id,verification_state,archived_at",
+        [id],
+      )
+    )[0];
     if (!after) throw new Error("Application cycle could not be archived.");
     await audit(sql, String(user.id), "application_cycle", id, "archived", before, after);
     updateTag("public-programs");
     revalidatePath("/admin");
     revalidatePath("/");
     revalidatePath("/services/scholarships");
-    const program = (await sql.query("select slug from programs where id=$1", [before.program_id]))[0];
-    if (program?.slug) revalidatePath(`/services/scholarships/${program.slug}`);
+    revalidatePath("/services/other-financial-assistance");
+    revalidatePath("/search");
     return { ok: true, message: "Application cycle archived." };
   } catch (error) {
-    return { ok: false, error: error instanceof Error ? error.message : "Application cycle could not be archived." };
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Application cycle could not be archived.",
+    };
   }
 }
 export async function saveAnnouncementAction(form: FormData): Promise<AdminActionState> {

@@ -1,8 +1,19 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { Poppins } from "next/font/google";
 import { SiteHeader } from "@/src/components/site-header";
 import { SiteFooter } from "@/src/components/site-footer";
+import { ScrollEntrances } from "@/src/components/scroll-entrances";
 import { siteConfig } from "@/src/lib/constants";
 import "./globals.css";
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  style: ["normal", "italic"],
+  variable: "--font-poppins",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -15,9 +26,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={poppins.variable}>
       <body suppressHydrationWarning>
         <SiteHeader />
+        <Suspense fallback={null}>
+          <ScrollEntrances />
+        </Suspense>
         <main id="main-content">{children}</main>
         <SiteFooter />
       </body>

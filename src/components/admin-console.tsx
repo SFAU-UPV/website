@@ -12,7 +12,13 @@ import {
   saveProgramAction,
   type AdminActionState,
 } from "@/src/lib/admin";
-import { getPrimaryCycle, resolveApplicationAvailability, undergraduateDegreePrograms, type ApplicationCycle, type Program } from "@/src/types/domain";
+import {
+  getPrimaryCycle,
+  resolveApplicationAvailability,
+  undergraduateDegreePrograms,
+  type ApplicationCycle,
+  type Program,
+} from "@/src/types/domain";
 
 type RecordValue = Record<string, unknown>;
 type AdminSnapshot = {
@@ -67,11 +73,14 @@ function StateAction({
   }
 
   return (
-    <AlertDialog isOpen={isOpen} onOpenChange={(open) => {
-      if (busy) return;
-      setIsOpen(open);
-      if (!open) setResult(null);
-    }}>
+    <AlertDialog
+      isOpen={isOpen}
+      onOpenChange={(open) => {
+        if (busy) return;
+        setIsOpen(open);
+        if (!open) setResult(null);
+      }}
+    >
       <Button
         type="button"
         variant={label === "Archive" ? "danger-soft" : "secondary"}
@@ -85,11 +94,16 @@ function StateAction({
         <AlertDialog.Container placement="center" size="sm">
           <AlertDialog.Dialog>
             <AlertDialog.Header>
-              <AlertDialog.Heading>{result?.ok ? "Action completed" : `${label} ${subject}?`}</AlertDialog.Heading>
+              <AlertDialog.Heading>
+                {result?.ok ? "Action completed" : `${label} ${subject}?`}
+              </AlertDialog.Heading>
             </AlertDialog.Header>
             <AlertDialog.Body>
               {result ? (
-                <p className={result.ok ? "admin-success" : "admin-error"} role={result.ok ? "status" : "alert"}>
+                <p
+                  className={result.ok ? "admin-success" : "admin-error"}
+                  role={result.ok ? "status" : "alert"}
+                >
                   {result.message ?? result.error}
                 </p>
               ) : (
@@ -102,7 +116,12 @@ function StateAction({
               )}
             </AlertDialog.Body>
             <AlertDialog.Footer>
-              <Button type="button" variant="outline" isDisabled={busy} onPress={() => setIsOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                isDisabled={busy}
+                onPress={() => setIsOpen(false)}
+              >
                 {result?.ok ? "Close" : "Cancel"}
               </Button>
               {!result?.ok ? (
@@ -188,15 +207,16 @@ function DegreeProgramsField({
   onDirty: () => void;
 }) {
   const [selected, setSelected] = useState(() => new Set(initialValues));
-  const options = Array.from(new Set([...undergraduateDegreePrograms, ...initialValues])).sort((a, b) =>
-    a.localeCompare(b),
+  const options = Array.from(new Set([...undergraduateDegreePrograms, ...initialValues])).sort(
+    (a, b) => a.localeCompare(b),
   );
   const selectedNames = options.filter((degree) => selected.has(degree));
-  const selectionLabel = selectedNames.length === 0
-    ? "Choose degree programs"
-    : selectedNames.length <= 2
-      ? selectedNames.join(", ")
-      : `${selectedNames.slice(0, 2).join(", ")} +${selectedNames.length - 2} more`;
+  const selectionLabel =
+    selectedNames.length === 0
+      ? "Choose degree programs"
+      : selectedNames.length <= 2
+        ? selectedNames.join(", ")
+        : `${selectedNames.slice(0, 2).join(", ")} +${selectedNames.length - 2} more`;
 
   return (
     <div className="admin-degree-field">
@@ -211,7 +231,9 @@ function DegreeProgramsField({
           type="button"
           aria-describedby="degree-programs-hint"
         >
-          <span className="admin-degree-selection" title={selectedNames.join(", ") || undefined}>{selectionLabel}</span>
+          <span className="admin-degree-selection" title={selectedNames.join(", ") || undefined}>
+            {selectionLabel}
+          </span>
           <span aria-hidden="true">⌄</span>
         </Dropdown.Trigger>
         <Dropdown.Popover className="admin-degree-popover">
@@ -290,14 +312,47 @@ function StructuredListField({
                 value={item.text}
                 aria-label={`${label}, item ${index + 1}`}
                 onChange={(event) => {
-                  setItems((current) => current.map((entry) => entry.id === item.id ? { ...entry, text: event.target.value } : entry));
+                  setItems((current) =>
+                    current.map((entry) =>
+                      entry.id === item.id ? { ...entry, text: event.target.value } : entry,
+                    ),
+                  );
                   onDirty();
                 }}
               />
               <div className="admin-list-item-actions">
-                <Button type="button" variant="outline" size="sm" isDisabled={index === 0} aria-label={`Move ${label.toLowerCase()} item ${index + 1} up`} onPress={() => moveItem(index, -1)}>Move up</Button>
-                <Button type="button" variant="outline" size="sm" isDisabled={index === items.length - 1} aria-label={`Move ${label.toLowerCase()} item ${index + 1} down`} onPress={() => moveItem(index, 1)}>Move down</Button>
-                <Button type="button" variant="outline" size="sm" aria-label={`Remove ${label.toLowerCase()} item ${index + 1}`} onPress={() => { setItems((current) => current.filter((entry) => entry.id !== item.id)); onDirty(); }}>Remove</Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  isDisabled={index === 0}
+                  aria-label={`Move ${label.toLowerCase()} item ${index + 1} up`}
+                  onPress={() => moveItem(index, -1)}
+                >
+                  Move up
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  isDisabled={index === items.length - 1}
+                  aria-label={`Move ${label.toLowerCase()} item ${index + 1} down`}
+                  onPress={() => moveItem(index, 1)}
+                >
+                  Move down
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  aria-label={`Remove ${label.toLowerCase()} item ${index + 1}`}
+                  onPress={() => {
+                    setItems((current) => current.filter((entry) => entry.id !== item.id));
+                    onDirty();
+                  }}
+                >
+                  Remove
+                </Button>
               </div>
             </li>
           ))}
@@ -305,7 +360,15 @@ function StructuredListField({
       ) : (
         <p className="admin-list-empty">No {label.toLowerCase()} added.</p>
       )}
-      <Button type="button" variant="outline" size="sm" className="admin-list-add" onPress={addItem}>Add {label.toLowerCase()} item</Button>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="admin-list-add"
+        onPress={addItem}
+      >
+        Add {label.toLowerCase()} item
+      </Button>
     </fieldset>
   );
 }
@@ -344,9 +407,7 @@ function ProgramForm({
   const [slugEdited, setSlugEdited] = useState(Boolean(program));
   const slugDetailsRef = useRef<HTMLDetailsElement>(null);
   const [serviceCategory, setServiceCategory] = useState(
-    program
-      ? value(program, "service_category_id") || scholarshipDirectoryOption
-      : "",
+    program ? value(program, "service_category_id") || scholarshipDirectoryOption : "",
   );
   const [publicationStatus, setPublicationStatus] = useState(
     value(program ?? {}, "publication_status") || "draft",
@@ -354,7 +415,10 @@ function ProgramForm({
   const [categorySlugs, setCategorySlugs] = useState(
     Array.isArray(program?.category_slugs) ? (program?.category_slugs as string[]).join(", ") : "",
   );
-  const markDirty = () => { setDirty(true); onDirty(); };
+  const markDirty = () => {
+    setDirty(true);
+    onDirty();
+  };
   const isScholarshipService = (selected: string) =>
     selected === scholarshipDirectoryOption ||
     services.some(
@@ -363,9 +427,10 @@ function ProgramForm({
   async function changePublicationStatus() {
     if (!program || dirty || busy) return;
     const next = publicationStatus === "published" ? "draft" : "published";
-    const message = next === "published"
-      ? "Publish this program information? Applications remain unavailable until a cycle is verified."
-      : "Unpublish this program? Its page will be hidden from students.";
+    const message =
+      next === "published"
+        ? "Publish this program information? Applications remain unavailable until a cycle is verified."
+        : "Unpublish this program? Its page will be hidden from students.";
     if (!window.confirm(message)) return;
     const form = new FormData();
     form.set("id", value(program, "id"));
@@ -374,10 +439,15 @@ function ProgramForm({
     try {
       const result = await changeProgramStateAction(form);
       setState(result);
-      if (result.ok) { setPublicationStatus(next); onStatusChanged?.(next); }
+      if (result.ok) {
+        setPublicationStatus(next);
+        onStatusChanged?.(next);
+      }
     } catch {
       setState({ ok: false, error: "Publication status could not be changed. Please try again." });
-    } finally { setBusy(false); }
+    } finally {
+      setBusy(false);
+    }
   }
   return (
     <form
@@ -392,7 +462,10 @@ function ProgramForm({
             slugDetailsRef.current?.setAttribute("open", "");
             window.requestAnimationFrame(() => document.getElementById("program-slug")?.focus());
           }
-          if (result.ok && result.program) { setDirty(false); onSaved(result.program, result.message ?? "Program saved."); }
+          if (result.ok && result.program) {
+            setDirty(false);
+            onSaved(result.program, result.message ?? "Program saved.");
+          }
         } catch {
           setState({ ok: false, error: "Program could not be saved. Please try again." });
         } finally {
@@ -404,7 +477,17 @@ function ProgramForm({
       <div className="admin-form-grid">
         <label>
           Name
-          <input name="name" required autoFocus value={name} onChange={(event) => { setName(event.target.value); if (!slugEdited) setSlug(slugFromName(event.target.value)); markDirty(); }} />
+          <input
+            name="name"
+            required
+            autoFocus
+            value={name}
+            onChange={(event) => {
+              setName(event.target.value);
+              if (!slugEdited) setSlug(slugFromName(event.target.value));
+              markDirty();
+            }}
+          />
         </label>
         <AdminDropdown
           label="Service"
@@ -426,7 +509,10 @@ function ProgramForm({
             label="Categories"
             name="category_slugs"
             value={categorySlugs}
-            onChange={(selected) => { markDirty(); setCategorySlugs(selected); }}
+            onChange={(selected) => {
+              markDirty();
+              setCategorySlugs(selected);
+            }}
             multiple
             options={categories.map((item) => ({
               value: value(item, "slug"),
@@ -446,30 +532,79 @@ function ProgramForm({
       </div>
       <input type="hidden" name="slug" value={slug} />
       <input type="hidden" name="publication_status" value={publicationStatus} />
-      {program ? <details className="admin-editor-advanced" ref={slugDetailsRef}>
-        <summary>URL settings</summary>
-        <label>Page URL slug<input id="program-slug" value={slug} onChange={(event) => { setSlug(event.target.value); setSlugEdited(true); markDirty(); }} required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" />{state.fieldErrors?.slug ? <span className="admin-form-field-error">{state.fieldErrors.slug}</span> : null}</label>
-        <p>Changing this slug changes the program page URL. Check links that may point to the current address.</p>
-      </details> : <p className="admin-note">Page address: /programs/{slug || "program-name"}</p>}
+      {program ? (
+        <details className="admin-editor-advanced" ref={slugDetailsRef}>
+          <summary>Program identifier</summary>
+          <label>
+            Program slug
+            <input
+              id="program-slug"
+              value={slug}
+              onChange={(event) => {
+                setSlug(event.target.value);
+                setSlugEdited(true);
+                markDirty();
+              }}
+              required
+              pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+            />
+            {state.fieldErrors?.slug ? (
+              <span className="admin-form-field-error">{state.fieldErrors.slug}</span>
+            ) : null}
+          </label>
+          <p>This identifier must be unique for each program.</p>
+        </details>
+      ) : (
+        <p className="admin-note">Program identifier: {slug || "program-name"}</p>
+      )}
       <label>
         Description / overview
-        <textarea
-          name="description"
-          rows={5}
-          defaultValue={value(program ?? {}, "description")}
-        />
+        <textarea name="description" rows={5} defaultValue={value(program ?? {}, "description")} />
       </label>
       <div className="admin-form-grid">
-        <StructuredListField name="eligibility" label="Eligibility" initialValues={Array.isArray(program?.eligibility) ? program.eligibility as string[] : []} onDirty={markDirty} />
-        <StructuredListField name="requirements" label="Required documents" initialValues={Array.isArray(program?.requirements) ? program.requirements as string[] : []} onDirty={markDirty} />
-        <StructuredListField name="benefits" label="Benefits" initialValues={Array.isArray(program?.benefits) ? program.benefits as string[] : []} onDirty={markDirty} />
+        <StructuredListField
+          name="eligibility"
+          label="Eligibility"
+          initialValues={
+            Array.isArray(program?.eligibility) ? (program.eligibility as string[]) : []
+          }
+          onDirty={markDirty}
+        />
+        <StructuredListField
+          name="requirements"
+          label="Required documents"
+          initialValues={
+            Array.isArray(program?.requirements) ? (program.requirements as string[]) : []
+          }
+          onDirty={markDirty}
+        />
+        <StructuredListField
+          name="benefits"
+          label="Benefits"
+          initialValues={Array.isArray(program?.benefits) ? (program.benefits as string[]) : []}
+          onDirty={markDirty}
+        />
         <DegreeProgramsField
-          initialValues={Array.isArray(program?.degree_programs) ? (program.degree_programs as string[]) : []}
+          initialValues={
+            Array.isArray(program?.degree_programs) ? (program.degree_programs as string[]) : []
+          }
           onDirty={markDirty}
         />
       </div>
-      <StructuredListField name="application_process" label="Application process" initialValues={Array.isArray(program?.application_process) ? program.application_process as string[] : []} onDirty={markDirty} />
-      <p className="admin-note">Set application dates, links, and verification in Application cycles after saving this program.</p>
+      <StructuredListField
+        name="application_process"
+        label="Application process"
+        initialValues={
+          Array.isArray(program?.application_process)
+            ? (program.application_process as string[])
+            : []
+        }
+        onDirty={markDirty}
+      />
+      <p className="admin-note">
+        Set application dates, links, and verification in Application cycles after saving this
+        program.
+      </p>
       <label className="checkbox-label">
         <input name="featured" type="checkbox" defaultChecked={Boolean(program?.featured)} />{" "}
         Feature on the public home page
@@ -477,7 +612,13 @@ function ProgramForm({
       <div className="admin-actions admin-program-savebar">
         <span>{dirty ? "Unsaved changes" : "All changes saved"}</span>
         <Button variant="primary" type="submit" isDisabled={busy}>
-          {busy ? "Saving..." : program ? "Save changes" : publicationStatus === "published" ? "Save and publish" : "Save draft"}
+          {busy
+            ? "Saving..."
+            : program
+              ? "Save changes"
+              : publicationStatus === "published"
+                ? "Save and publish"
+                : "Save draft"}
         </Button>
         <Button
           variant="outline"
@@ -496,7 +637,16 @@ function ProgramForm({
         <Button variant="outline" type="button" onPress={() => onDone?.()}>
           Cancel
         </Button>
-        {program ? <Button variant="outline" type="button" isDisabled={dirty || busy} onPress={changePublicationStatus}>{publicationStatus === "published" ? "Unpublish" : "Publish"}</Button> : null}
+        {program ? (
+          <Button
+            variant="outline"
+            type="button"
+            isDisabled={dirty || busy}
+            onPress={changePublicationStatus}
+          >
+            {publicationStatus === "published" ? "Unpublish" : "Publish"}
+          </Button>
+        ) : null}
       </div>
       <ActionFeedback state={state} />
     </form>
@@ -523,29 +673,56 @@ export function AdminProgramEditor({
     window.addEventListener("beforeunload", preventLeave);
     return () => window.removeEventListener("beforeunload", preventLeave);
   }, [dirty]);
-  return <div className="admin-program-editor-page">
-    <header className="admin-program-editor-heading">
-      <a href="/admin">Back to workspace</a>
-      <h1>{program ? `Edit ${value(program, "name")}` : "Add a program"}</h1>
-      <p>Save program information here. Application dates and verified links are set in Application cycles.</p>
-    </header>
-    {message ? <div className="admin-next-step" role="status"><p>{message}</p>{saved && savedProgram ? <Button variant="secondary" onPress={() => router.push(`/admin?tab=cycles&newCycleFor=${encodeURIComponent(value(savedProgram, "id"))}`)}>Set up an application cycle</Button> : null}</div> : null}
-    <ProgramForm
-      key={value(program ?? {}, "id") || "new"}
-      program={program}
-      services={services}
-      categories={categories}
-      onDone={() => { if (!dirty || window.confirm("Discard your unsaved program changes?")) router.push("/admin?tab=programs"); }}
-      onDirty={() => setDirty(true)}
-      onStatusChanged={() => router.refresh()}
-      onSaved={(item, text) => {
-        setDirty(false); setSaved(true); setSavedProgram(item); setMessage(text);
-        const id = value(item, "id");
-        if (!program && id) router.replace(`/admin/programs/${encodeURIComponent(id)}/edit`);
-        router.refresh();
-      }}
-    />
-  </div>;
+  return (
+    <div className="admin-program-editor-page">
+      <header className="admin-program-editor-heading">
+        <a href="/admin">Back to workspace</a>
+        <h1>{program ? `Edit ${value(program, "name")}` : "Add a program"}</h1>
+        <p>
+          Save program information here. Application dates and verified links are set in Application
+          cycles.
+        </p>
+      </header>
+      {message ? (
+        <div className="admin-next-step" role="status">
+          <p>{message}</p>
+          {saved && savedProgram ? (
+            <Button
+              variant="secondary"
+              onPress={() =>
+                router.push(
+                  `/admin?tab=cycles&newCycleFor=${encodeURIComponent(value(savedProgram, "id"))}`,
+                )
+              }
+            >
+              Set up an application cycle
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+      <ProgramForm
+        key={value(program ?? {}, "id") || "new"}
+        program={program}
+        services={services}
+        categories={categories}
+        onDone={() => {
+          if (!dirty || window.confirm("Discard your unsaved program changes?"))
+            router.push("/admin?tab=programs");
+        }}
+        onDirty={() => setDirty(true)}
+        onStatusChanged={() => router.refresh()}
+        onSaved={(item, text) => {
+          setDirty(false);
+          setSaved(true);
+          setSavedProgram(item);
+          setMessage(text);
+          const id = value(item, "id");
+          if (!program && id) router.replace(`/admin/programs/${encodeURIComponent(id)}/edit`);
+          router.refresh();
+        }}
+      />
+    </div>
+  );
 }
 
 function CycleForm({
@@ -569,7 +746,10 @@ function CycleForm({
   return (
     <form
       className="admin-form"
-      onChangeCapture={() => { setDirty(true); onDirty?.(); }}
+      onChangeCapture={() => {
+        setDirty(true);
+        onDirty?.();
+      }}
       action={async (form) => {
         setBusy(true);
         try {
@@ -587,8 +767,15 @@ function CycleForm({
       <div className="admin-form-grid">
         <label>
           Program
-          {cycle ? <input type="hidden" name="program_id" value={value(cycle, "program_id")} /> : null}
-          <select name={cycle ? undefined : "program_id"} required disabled={Boolean(cycle)} defaultValue={value(cycle ?? {}, "program_id") || defaultProgramId || ""}>
+          {cycle ? (
+            <input type="hidden" name="program_id" value={value(cycle, "program_id")} />
+          ) : null}
+          <select
+            name={cycle ? undefined : "program_id"}
+            required
+            disabled={Boolean(cycle)}
+            defaultValue={value(cycle ?? {}, "program_id") || defaultProgramId || ""}
+          >
             <option value="">Choose program</option>
             {programs.map((program) => (
               <option key={value(program, "id")} value={value(program, "id")}>
@@ -599,19 +786,35 @@ function CycleForm({
         </label>
         <label>
           Academic year
-          <input name="academic_year" placeholder="2026–2027" defaultValue={value(cycle ?? {}, "academic_year")} />
+          <input
+            name="academic_year"
+            placeholder="2026–2027"
+            defaultValue={value(cycle ?? {}, "academic_year")}
+          />
         </label>
         <label>
           Cycle label
-          <input name="cycle_label" placeholder="First semester" defaultValue={value(cycle ?? {}, "cycle_label")} />
+          <input
+            name="cycle_label"
+            placeholder="First semester"
+            defaultValue={value(cycle ?? {}, "cycle_label")}
+          />
         </label>
         <label>
           Opens
-          <input name="verified_open_at" type="date" defaultValue={value(cycle ?? {}, "verified_open_at").slice(0, 10)} />
+          <input
+            name="verified_open_at"
+            type="date"
+            defaultValue={value(cycle ?? {}, "verified_open_at").slice(0, 10)}
+          />
         </label>
         <label>
           Closes
-          <input name="close_at" type="date" defaultValue={value(cycle ?? {}, "close_at").slice(0, 10)} />
+          <input
+            name="close_at"
+            type="date"
+            defaultValue={value(cycle ?? {}, "close_at").slice(0, 10)}
+          />
         </label>
         <label>
           Link type
@@ -634,7 +837,12 @@ function CycleForm({
       </div>
       <label>
         Application URL
-        <input name="external_url" type="url" placeholder="https://..." defaultValue={value(cycle ?? {}, "external_url")} />
+        <input
+          name="external_url"
+          type="url"
+          placeholder="https://..."
+          defaultValue={value(cycle ?? {}, "external_url")}
+        />
       </label>
       <label className="checkbox-label admin-verify-control">
         <input name="verify_details" type="checkbox" />
@@ -649,9 +857,17 @@ function CycleForm({
         <Button variant="primary" type="submit" isDisabled={busy}>
           {busy ? "Saving..." : cycle ? "Save cycle" : "Create cycle"}
         </Button>
-        {onCancel ? <Button variant="outline" type="button" onPress={() => {
-          if (!dirty || window.confirm("Discard your unsaved cycle changes?")) onCancel();
-        }}>Cancel</Button> : null}
+        {onCancel ? (
+          <Button
+            variant="outline"
+            type="button"
+            onPress={() => {
+              if (!dirty || window.confirm("Discard your unsaved cycle changes?")) onCancel();
+            }}
+          >
+            Cancel
+          </Button>
+        ) : null}
       </div>
       <ActionFeedback state={state} />
     </form>
@@ -675,7 +891,10 @@ function AnnouncementForm({
   return (
     <form
       className="admin-form"
-      onChangeCapture={() => { setDirty(true); onDirty?.(); }}
+      onChangeCapture={() => {
+        setDirty(true);
+        onDirty?.();
+      }}
       action={async (form) => {
         setBusy(true);
         try {
@@ -733,9 +952,13 @@ function AnnouncementForm({
           {busy ? "Saving..." : announcement ? "Save changes" : "Save announcement"}
         </Button>
         {onDone ? (
-          <Button variant="outline" type="button" onPress={() => {
-            if (!dirty || window.confirm("Discard your unsaved announcement changes?")) onDone();
-          }}>
+          <Button
+            variant="outline"
+            type="button"
+            onPress={() => {
+              if (!dirty || window.confirm("Discard your unsaved announcement changes?")) onDone();
+            }}
+          >
             Cancel
           </Button>
         ) : null}
@@ -752,13 +975,19 @@ function auditTime(input: unknown) {
   const date = new Date(String(input ?? ""));
   return Number.isNaN(date.getTime())
     ? "Unknown time"
-    : new Intl.DateTimeFormat("en-PH", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Manila" }).format(date);
+    : new Intl.DateTimeFormat("en-PH", {
+        dateStyle: "medium",
+        timeStyle: "short",
+        timeZone: "Asia/Manila",
+      }).format(date);
 }
 function adminDate(input: unknown) {
   const date = new Date(String(input ?? ""));
   return Number.isNaN(date.getTime())
     ? "—"
-    : new Intl.DateTimeFormat("en-PH", { dateStyle: "medium", timeZone: "Asia/Manila" }).format(date);
+    : new Intl.DateTimeFormat("en-PH", { dateStyle: "medium", timeZone: "Asia/Manila" }).format(
+        date,
+      );
 }
 function programApplicationStatus(program: RecordValue) {
   const cycles = Array.isArray(program.application_cycles)
@@ -771,16 +1000,28 @@ function programApplicationStatus(program: RecordValue) {
     endsOn: value(cycle, "close_at").slice(0, 10) || null,
     externalApplicationUrl: value(cycle, "external_url") || undefined,
     linkType: (value(cycle, "link_type") || undefined) as ApplicationCycle["linkType"],
-    verificationStatus: value(cycle, "verification_state") === "verified" ? "verified" : "unverified",
+    verificationStatus:
+      value(cycle, "verification_state") === "verified" ? "verified" : "unverified",
     declaredAvailability: "unverified",
-    statusOverride: (value(cycle, "admin_override") || undefined) as ApplicationCycle["statusOverride"],
+    statusOverride: (value(cycle, "admin_override") ||
+      undefined) as ApplicationCycle["statusOverride"],
   }));
   return resolveApplicationAvailability(getPrimaryCycle({ cycles: mapped } as Program));
 }
 
-export function AdminConsole({ snapshot, initialTab = "overview", newCycleFor }: { snapshot: AdminSnapshot; initialTab?: "overview" | "programs" | "cycles" | "announcements" | "audit"; newCycleFor?: string }) {
+export function AdminConsole({
+  snapshot,
+  initialTab = "overview",
+  newCycleFor,
+}: {
+  snapshot: AdminSnapshot;
+  initialTab?: "overview" | "programs" | "cycles" | "announcements" | "audit";
+  newCycleFor?: string;
+}) {
   const router = useRouter();
-  const [tab, setTab] = useState<"overview" | "programs" | "cycles" | "announcements" | "audit">(initialTab);
+  const [tab, setTab] = useState<"overview" | "programs" | "cycles" | "announcements" | "audit">(
+    initialTab,
+  );
   const [editing, setEditing] = useState<RecordValue | undefined>();
   const editorTriggerRef = useRef<HTMLElement | null>(null);
   const [editorDirty, setEditorDirty] = useState(false);
@@ -828,13 +1069,28 @@ export function AdminConsole({ snapshot, initialTab = "overview", newCycleFor }:
   );
   const pages = Math.max(1, Math.ceil(filteredPrograms.length / pageSize));
   const currentPage = Math.min(page, pages);
-  const visiblePrograms = filteredPrograms.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-  const hasProgramFilters = Boolean(query || publication !== "all" || category !== "all" || availability !== "all" || sort !== "updated");
+  const visiblePrograms = filteredPrograms.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
+  const hasProgramFilters = Boolean(
+    query ||
+    publication !== "all" ||
+    category !== "all" ||
+    availability !== "all" ||
+    sort !== "updated",
+  );
   const publishedUnverified = snapshot.programs.filter(
-    (program) => value(program, "publication_status") === "published" && programApplicationStatus(program) === "unverified",
+    (program) =>
+      value(program, "publication_status") === "published" &&
+      programApplicationStatus(program) === "unverified",
   ).length;
-  const draftPrograms = snapshot.programs.filter((program) => value(program, "publication_status") === "draft").length;
-  const draftAnnouncements = snapshot.announcements.filter((item) => value(item, "publication_status") === "draft").length;
+  const draftPrograms = snapshot.programs.filter(
+    (program) => value(program, "publication_status") === "draft",
+  ).length;
+  const draftAnnouncements = snapshot.announcements.filter(
+    (item) => value(item, "publication_status") === "draft",
+  ).length;
   useEffect(() => {
     if (cycleEditorOpen) cycleEditorHeadingRef.current?.focus();
   }, [cycleEditorOpen, editingCycle]);
@@ -850,8 +1106,10 @@ export function AdminConsole({ snapshot, initialTab = "overview", newCycleFor }:
     return () => window.removeEventListener("beforeunload", warnBeforeLeaving);
   }, [editorDirty, cycleDirty, announcementDirty]);
   function canLeaveCurrentSection() {
-    if (tab === "cycles" && cycleDirty) return window.confirm("Discard your unsaved cycle changes?");
-    if (tab === "announcements" && announcementDirty) return window.confirm("Discard your unsaved announcement changes?");
+    if (tab === "cycles" && cycleDirty)
+      return window.confirm("Discard your unsaved cycle changes?");
+    if (tab === "announcements" && announcementDirty)
+      return window.confirm("Discard your unsaved announcement changes?");
     return true;
   }
   function closeProgramEditor() {
@@ -877,7 +1135,17 @@ export function AdminConsole({ snapshot, initialTab = "overview", newCycleFor }:
             className={tab === key ? "active" : ""}
             type="button"
             aria-current={tab === key ? "page" : undefined}
-            onClick={() => { if (key === tab || canLeaveCurrentSection()) { setCycleDirty(false); setAnnouncementDirty(false); setCycleEditorOpen(false); setAnnouncementEditorOpen(false); setEditingCycle(undefined); setEditingAnnouncement(undefined); setTab(key); } }}
+            onClick={() => {
+              if (key === tab || canLeaveCurrentSection()) {
+                setCycleDirty(false);
+                setAnnouncementDirty(false);
+                setCycleEditorOpen(false);
+                setAnnouncementEditorOpen(false);
+                setEditingCycle(undefined);
+                setEditingAnnouncement(undefined);
+                setTab(key);
+              }
+            }}
           >
             {label}
           </button>
@@ -890,20 +1158,60 @@ export function AdminConsole({ snapshot, initialTab = "overview", newCycleFor }:
           </div>
           <div className="admin-task-list">
             {publishedUnverified === 0 && draftPrograms === 0 && draftAnnouncements === 0 ? (
-              <p className="admin-empty-state">No content reviews are pending. Use the tabs to manage programs, application cycles, and announcements.</p>
+              <p className="admin-empty-state">
+                No content reviews are pending. Use the tabs to manage programs, application cycles,
+                and announcements.
+              </p>
             ) : null}
-            {publishedUnverified > 0 ? <div className="admin-task-row">
-              <div><strong>{publishedUnverified} published programs need application details</strong><p>Verify the official link and both dates before students can apply.</p></div>
-              <Button variant="secondary" onPress={() => { setAvailability("unverified"); setPublication("published"); setPage(1); setTab("programs"); }}>Review programs</Button>
-            </div> : null}
-            {draftPrograms > 0 ? <div className="admin-task-row">
-              <div><strong>{draftPrograms} program drafts</strong><p>Review content and preview its student view before publishing.</p></div>
-              <Button variant="secondary" onPress={() => { setPublication("draft"); setAvailability("all"); setPage(1); setTab("programs"); }}>Review drafts</Button>
-            </div> : null}
-            {draftAnnouncements > 0 ? <div className="admin-task-row">
-              <div><strong>{draftAnnouncements} announcement drafts</strong><p>Finish or publish notices that students should see.</p></div>
-              <Button variant="secondary" onPress={() => setTab("announcements")}>Review announcements</Button>
-            </div> : null}
+            {publishedUnverified > 0 ? (
+              <div className="admin-task-row">
+                <div>
+                  <strong>{publishedUnverified} published programs need application details</strong>
+                  <p>Verify the official link and both dates before students can apply.</p>
+                </div>
+                <Button
+                  variant="secondary"
+                  onPress={() => {
+                    setAvailability("unverified");
+                    setPublication("published");
+                    setPage(1);
+                    setTab("programs");
+                  }}
+                >
+                  Review programs
+                </Button>
+              </div>
+            ) : null}
+            {draftPrograms > 0 ? (
+              <div className="admin-task-row">
+                <div>
+                  <strong>{draftPrograms} program drafts</strong>
+                  <p>Review content and preview its student view before publishing.</p>
+                </div>
+                <Button
+                  variant="secondary"
+                  onPress={() => {
+                    setPublication("draft");
+                    setAvailability("all");
+                    setPage(1);
+                    setTab("programs");
+                  }}
+                >
+                  Review drafts
+                </Button>
+              </div>
+            ) : null}
+            {draftAnnouncements > 0 ? (
+              <div className="admin-task-row">
+                <div>
+                  <strong>{draftAnnouncements} announcement drafts</strong>
+                  <p>Finish or publish notices that students should see.</p>
+                </div>
+                <Button variant="secondary" onPress={() => setTab("announcements")}>
+                  Review announcements
+                </Button>
+              </div>
+            ) : null}
           </div>
         </section>
       ) : null}
@@ -918,9 +1226,12 @@ export function AdminConsole({ snapshot, initialTab = "overview", newCycleFor }:
             </Button>
           </div>
           {editing ? (
-            <Modal isOpen onOpenChange={(open) => {
-              if (!open) closeProgramEditor();
-            }}>
+            <Modal
+              isOpen
+              onOpenChange={(open) => {
+                if (!open) closeProgramEditor();
+              }}
+            >
               <Modal.Backdrop className="admin-modal-backdrop">
                 <Modal.Container className="admin-modal-container" placement="center">
                   <Modal.Dialog className="admin-modal" aria-labelledby="program-editor-title">
@@ -940,7 +1251,11 @@ export function AdminConsole({ snapshot, initialTab = "overview", newCycleFor }:
                         ×
                       </Button>
                     </div>
-                    {editorMessage ? <p className="admin-success" role="status">{editorMessage}</p> : null}
+                    {editorMessage ? (
+                      <p className="admin-success" role="status">
+                        {editorMessage}
+                      </p>
+                    ) : null}
                     <ProgramForm
                       key={`${value(editing, "id")}:${editorRevision}`}
                       program={value(editing, "id") ? editing : undefined}
@@ -1030,7 +1345,27 @@ export function AdminConsole({ snapshot, initialTab = "overview", newCycleFor }:
               </select>
             </label>
           </div>
-          {hasProgramFilters ? <div className="admin-filter-summary"><span>{filteredPrograms.length} matching program{filteredPrograms.length === 1 ? "" : "s"}</span><Button variant="outline" size="sm" onPress={() => { setQuery(""); setPublication("all"); setCategory("all"); setAvailability("all"); setSort("updated"); setPage(1); }}>Clear filters</Button></div> : null}
+          {hasProgramFilters ? (
+            <div className="admin-filter-summary">
+              <span>
+                {filteredPrograms.length} matching program{filteredPrograms.length === 1 ? "" : "s"}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onPress={() => {
+                  setQuery("");
+                  setPublication("all");
+                  setCategory("all");
+                  setAvailability("all");
+                  setSort("updated");
+                  setPage(1);
+                }}
+              >
+                Clear filters
+              </Button>
+            </div>
+          ) : null}
           <div className="admin-table-wrap">
             <table className="admin-table admin-program-table">
               <thead>
@@ -1045,7 +1380,13 @@ export function AdminConsole({ snapshot, initialTab = "overview", newCycleFor }:
               </thead>
               <tbody>
                 {visiblePrograms.length === 0 ? (
-                  <tr className="admin-empty-row"><td colSpan={6} className="admin-empty-state">{hasProgramFilters ? "No programs match these filters. Clear filters to see all programs." : "No programs yet. Add a program to get started."}</td></tr>
+                  <tr className="admin-empty-row">
+                    <td colSpan={6} className="admin-empty-state">
+                      {hasProgramFilters
+                        ? "No programs match these filters. Clear filters to see all programs."
+                        : "No programs yet. Add a program to get started."}
+                    </td>
+                  </tr>
                 ) : null}
                 {visiblePrograms.map((program) => (
                   <tr key={value(program, "id")}>
@@ -1053,8 +1394,7 @@ export function AdminConsole({ snapshot, initialTab = "overview", newCycleFor }:
                       <strong>{value(program, "name")}</strong>
                     </td>
                     <td data-label="Service">
-                      {value(program, "service_name") ||
-                        "Scholarship directory"}
+                      {value(program, "service_name") || "Scholarship directory"}
                     </td>
                     <td data-label="Publication">
                       <span
@@ -1064,7 +1404,11 @@ export function AdminConsole({ snapshot, initialTab = "overview", newCycleFor }:
                       </span>
                     </td>
                     <td data-label="Application">
-                      <span className={`admin-state admin-state-${programApplicationStatus(program)}`}>{programApplicationStatus(program)}</span>
+                      <span
+                        className={`admin-state admin-state-${programApplicationStatus(program)}`}
+                      >
+                        {programApplicationStatus(program)}
+                      </span>
                     </td>
                     <td data-label="Updated">{adminDate(program.updated_at)}</td>
                     <td data-label="Actions">
@@ -1073,7 +1417,11 @@ export function AdminConsole({ snapshot, initialTab = "overview", newCycleFor }:
                           variant="secondary"
                           size="sm"
                           className="admin-action-button admin-action-edit"
-                          onPress={() => router.push(`/admin/programs/${encodeURIComponent(value(program, "id"))}/edit`)}
+                          onPress={() =>
+                            router.push(
+                              `/admin/programs/${encodeURIComponent(value(program, "id"))}/edit`,
+                            )
+                          }
                         >
                           Edit
                         </Button>
@@ -1120,13 +1468,23 @@ export function AdminConsole({ snapshot, initialTab = "overview", newCycleFor }:
           </div>
           <div className="admin-pagination">
             <span>{filteredPrograms.length} result(s)</span>
-            <Button variant="outline" size="sm" isDisabled={currentPage <= 1} onPress={() => setPage(currentPage - 1)}>
+            <Button
+              variant="outline"
+              size="sm"
+              isDisabled={currentPage <= 1}
+              onPress={() => setPage(currentPage - 1)}
+            >
               Previous
             </Button>
             <span>
               Page {currentPage} of {pages}
             </span>
-            <Button variant="outline" size="sm" isDisabled={currentPage >= pages} onPress={() => setPage(currentPage + 1)}>
+            <Button
+              variant="outline"
+              size="sm"
+              isDisabled={currentPage >= pages}
+              onPress={() => setPage(currentPage + 1)}
+            >
               Next
             </Button>
           </div>
@@ -1138,32 +1496,61 @@ export function AdminConsole({ snapshot, initialTab = "overview", newCycleFor }:
             <div>
               <h2>Application cycles</h2>
             </div>
-            <Button variant="primary" isDisabled={snapshot.programs.length === 0} onPress={() => { if (canLeaveCurrentSection()) { cycleEditorTriggerRef.current = document.activeElement as HTMLElement; setCycleDirty(false); setEditingCycle(undefined); setCycleMessage(""); setCycleRevision((revision) => revision + 1); setCycleEditorOpen(true); } }}>Add cycle</Button>
+            <Button
+              variant="primary"
+              isDisabled={snapshot.programs.length === 0}
+              onPress={() => {
+                if (canLeaveCurrentSection()) {
+                  cycleEditorTriggerRef.current = document.activeElement as HTMLElement;
+                  setCycleDirty(false);
+                  setEditingCycle(undefined);
+                  setCycleMessage("");
+                  setCycleRevision((revision) => revision + 1);
+                  setCycleEditorOpen(true);
+                }
+              }}
+            >
+              Add cycle
+            </Button>
           </div>
           <p className="admin-note">
-            Publishing a program makes its information visible. Applications become available only after staff verify both dates and the official HTTPS link.
+            Publishing a program makes its information visible. Applications become available only
+            after staff verify both dates and the official HTTPS link.
           </p>
-          {cycleMessage ? <p className="admin-success" role="status">{cycleMessage}</p> : null}
-          {cycleEditorOpen ? <div className="admin-editor">
-            <h3 ref={cycleEditorHeadingRef} tabIndex={-1}>{editingCycle ? "Edit application cycle" : "New application cycle"}</h3>
-            <CycleForm
-              key={`${value(editingCycle ?? {}, "id")}:${cycleRevision}`}
-              programs={snapshot.programs}
-              cycle={editingCycle}
-              defaultProgramId={newCycleFor}
-              onDirty={() => setCycleDirty(true)}
-              onSaved={(message) => {
-                setCycleMessage(message);
-                setCycleDirty(false);
-                setEditingCycle(undefined);
-                setCycleEditorOpen(false);
-                setCycleRevision((revision) => revision + 1);
-                router.refresh();
-                window.requestAnimationFrame(() => cycleEditorTriggerRef.current?.focus());
-              }}
-              onCancel={() => { setCycleDirty(false); setEditingCycle(undefined); setCycleEditorOpen(false); window.requestAnimationFrame(() => cycleEditorTriggerRef.current?.focus()); }}
-            />
-          </div> : null}
+          {cycleMessage ? (
+            <p className="admin-success" role="status">
+              {cycleMessage}
+            </p>
+          ) : null}
+          {cycleEditorOpen ? (
+            <div className="admin-editor">
+              <h3 ref={cycleEditorHeadingRef} tabIndex={-1}>
+                {editingCycle ? "Edit application cycle" : "New application cycle"}
+              </h3>
+              <CycleForm
+                key={`${value(editingCycle ?? {}, "id")}:${cycleRevision}`}
+                programs={snapshot.programs}
+                cycle={editingCycle}
+                defaultProgramId={newCycleFor}
+                onDirty={() => setCycleDirty(true)}
+                onSaved={(message) => {
+                  setCycleMessage(message);
+                  setCycleDirty(false);
+                  setEditingCycle(undefined);
+                  setCycleEditorOpen(false);
+                  setCycleRevision((revision) => revision + 1);
+                  router.refresh();
+                  window.requestAnimationFrame(() => cycleEditorTriggerRef.current?.focus());
+                }}
+                onCancel={() => {
+                  setCycleDirty(false);
+                  setEditingCycle(undefined);
+                  setCycleEditorOpen(false);
+                  window.requestAnimationFrame(() => cycleEditorTriggerRef.current?.focus());
+                }}
+              />
+            </div>
+          ) : null}
           <div className="admin-table-wrap">
             <table className="admin-table admin-cycle-table">
               <thead>
@@ -1178,8 +1565,18 @@ export function AdminConsole({ snapshot, initialTab = "overview", newCycleFor }:
                 </tr>
               </thead>
               <tbody>
-                {snapshot.programs.every((program) => !Array.isArray(program.application_cycles) || program.application_cycles.length === 0) ? (
-                  <tr className="admin-empty-row"><td colSpan={7} className="admin-empty-state">{snapshot.programs.length ? "No application cycles yet. Use Add cycle to create one." : "Add a program before creating its first application cycle."}</td></tr>
+                {snapshot.programs.every(
+                  (program) =>
+                    !Array.isArray(program.application_cycles) ||
+                    program.application_cycles.length === 0,
+                ) ? (
+                  <tr className="admin-empty-row">
+                    <td colSpan={7} className="admin-empty-state">
+                      {snapshot.programs.length
+                        ? "No application cycles yet. Use Add cycle to create one."
+                        : "Add a program before creating its first application cycle."}
+                    </td>
+                  </tr>
                 ) : null}
                 {snapshot.programs.flatMap((program) =>
                   (Array.isArray(program.application_cycles)
@@ -1193,13 +1590,53 @@ export function AdminConsole({ snapshot, initialTab = "overview", newCycleFor }:
                         {value(cycle, "verified_open_at").slice(0, 10) || "—"} –{" "}
                         {value(cycle, "close_at").slice(0, 10) || "—"}
                       </td>
-                      <td data-label="Application link">{value(cycle, "external_url") ? <a className="admin-cycle-link" href={value(cycle, "external_url")} target="_blank" rel="noopener noreferrer">Check destination</a> : "Missing"}</td>
-                      <td data-label="Verification"><span className={`admin-state admin-state-${value(cycle, "verification_state")}`}>{value(cycle, "verification_state")}</span></td>
+                      <td data-label="Application link">
+                        {value(cycle, "external_url") ? (
+                          <a
+                            className="admin-cycle-link"
+                            href={value(cycle, "external_url")}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Check destination
+                          </a>
+                        ) : (
+                          "Missing"
+                        )}
+                      </td>
+                      <td data-label="Verification">
+                        <span
+                          className={`admin-state admin-state-${value(cycle, "verification_state")}`}
+                        >
+                          {value(cycle, "verification_state")}
+                        </span>
+                      </td>
                       <td data-label="Hold">{value(cycle, "admin_override") || "None"}</td>
                       <td data-label="Actions">
                         <div className="admin-row-actions">
-                          <Button variant="secondary" size="sm" onPress={() => { if (canLeaveCurrentSection()) { cycleEditorTriggerRef.current = document.activeElement as HTMLElement; setCycleDirty(false); setCycleMessage(""); setEditingCycle(cycle); setCycleEditorOpen(true); } }}>Edit</Button>
-                          <StateAction id={value(cycle, "id")} nextStatus="archived" action={archiveCycleAction} label="Archive" subject="application cycle" />
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onPress={() => {
+                              if (canLeaveCurrentSection()) {
+                                cycleEditorTriggerRef.current =
+                                  document.activeElement as HTMLElement;
+                                setCycleDirty(false);
+                                setCycleMessage("");
+                                setEditingCycle(cycle);
+                                setCycleEditorOpen(true);
+                              }
+                            }}
+                          >
+                            Edit
+                          </Button>
+                          <StateAction
+                            id={value(cycle, "id")}
+                            nextStatus="archived"
+                            action={archiveCycleAction}
+                            label="Archive"
+                            subject="application cycle"
+                          />
                         </div>
                       </td>
                     </tr>
@@ -1216,17 +1653,42 @@ export function AdminConsole({ snapshot, initialTab = "overview", newCycleFor }:
             <div>
               <h2>Announcements</h2>
             </div>
-            <Button variant="primary" onPress={() => { if (canLeaveCurrentSection()) { announcementEditorTriggerRef.current = document.activeElement as HTMLElement; setAnnouncementDirty(false); setEditingAnnouncement(undefined); setAnnouncementMessage(""); setAnnouncementRevision((revision) => revision + 1); setAnnouncementEditorOpen(true); } }}>New announcement</Button>
+            <Button
+              variant="primary"
+              onPress={() => {
+                if (canLeaveCurrentSection()) {
+                  announcementEditorTriggerRef.current = document.activeElement as HTMLElement;
+                  setAnnouncementDirty(false);
+                  setEditingAnnouncement(undefined);
+                  setAnnouncementMessage("");
+                  setAnnouncementRevision((revision) => revision + 1);
+                  setAnnouncementEditorOpen(true);
+                }
+              }}
+            >
+              New announcement
+            </Button>
           </div>
-          {announcementMessage ? <p className="admin-success" role="status">{announcementMessage}</p> : null}
+          {announcementMessage ? (
+            <p className="admin-success" role="status">
+              {announcementMessage}
+            </p>
+          ) : null}
           {announcementEditorOpen ? (
             <div className="admin-editor">
-              <h3 ref={announcementEditorHeadingRef} tabIndex={-1}>{editingAnnouncement ? "Edit announcement" : "New announcement"}</h3>
+              <h3 ref={announcementEditorHeadingRef} tabIndex={-1}>
+                {editingAnnouncement ? "Edit announcement" : "New announcement"}
+              </h3>
               <AnnouncementForm
                 key={`${value(editingAnnouncement ?? {}, "id")}:${announcementRevision}`}
                 announcement={editingAnnouncement}
                 onDirty={() => setAnnouncementDirty(true)}
-                onDone={() => { setAnnouncementDirty(false); setEditingAnnouncement(undefined); setAnnouncementEditorOpen(false); window.requestAnimationFrame(() => announcementEditorTriggerRef.current?.focus()); }}
+                onDone={() => {
+                  setAnnouncementDirty(false);
+                  setEditingAnnouncement(undefined);
+                  setAnnouncementEditorOpen(false);
+                  window.requestAnimationFrame(() => announcementEditorTriggerRef.current?.focus());
+                }}
                 onSaved={(message) => {
                   setAnnouncementMessage(message);
                   setAnnouncementDirty(false);
@@ -1239,13 +1701,20 @@ export function AdminConsole({ snapshot, initialTab = "overview", newCycleFor }:
               />
             </div>
           ) : null}
-          {snapshot.announcements.length === 0 ? <p className="admin-empty-state">No announcements yet. Use New announcement to create a draft.</p> : null}
+          {snapshot.announcements.length === 0 ? (
+            <p className="admin-empty-state">
+              No announcements yet. Use New announcement to create a draft.
+            </p>
+          ) : null}
           {snapshot.announcements.map((announcement) => (
             <article className="admin-list-row" key={value(announcement, "id")}>
               <div>
                 <strong>{value(announcement, "title")}</strong>
                 <p>{value(announcement, "summary")}</p>
-                <small className="admin-list-meta">Updated {adminDate(announcement.updated_at)}{announcement.pinned ? " · Pinned" : ""}</small>
+                <small className="admin-list-meta">
+                  Updated {adminDate(announcement.updated_at)}
+                  {announcement.pinned ? " · Pinned" : ""}
+                </small>
               </div>
               <span
                 className={`admin-state admin-state-${value(announcement, "publication_status")}`}
@@ -1257,7 +1726,15 @@ export function AdminConsole({ snapshot, initialTab = "overview", newCycleFor }:
                   variant="secondary"
                   size="sm"
                   className="admin-action-button admin-action-edit"
-                  onPress={() => { if (canLeaveCurrentSection()) { announcementEditorTriggerRef.current = document.activeElement as HTMLElement; setAnnouncementDirty(false); setAnnouncementMessage(""); setEditingAnnouncement(announcement); setAnnouncementEditorOpen(true); } }}
+                  onPress={() => {
+                    if (canLeaveCurrentSection()) {
+                      announcementEditorTriggerRef.current = document.activeElement as HTMLElement;
+                      setAnnouncementDirty(false);
+                      setAnnouncementMessage("");
+                      setEditingAnnouncement(announcement);
+                      setAnnouncementEditorOpen(true);
+                    }
+                  }}
                 >
                   Edit
                 </Button>
@@ -1305,7 +1782,9 @@ export function AdminConsole({ snapshot, initialTab = "overview", newCycleFor }:
           <div className="admin-section-header">
             <div>
               <h2>Audit trail</h2>
-              <p className="admin-section-note">Recent 30 changes · Times shown in Philippine time</p>
+              <p className="admin-section-note">
+                Recent 30 changes · Times shown in Philippine time
+              </p>
             </div>
           </div>
           <div className="admin-table-wrap">
@@ -1319,16 +1798,28 @@ export function AdminConsole({ snapshot, initialTab = "overview", newCycleFor }:
                 </tr>
               </thead>
               <tbody>
-                {snapshot.audits.length === 0 ? <tr className="admin-empty-row"><td colSpan={4} className="admin-empty-state">No recorded changes yet.</td></tr> : null}
+                {snapshot.audits.length === 0 ? (
+                  <tr className="admin-empty-row">
+                    <td colSpan={4} className="admin-empty-state">
+                      No recorded changes yet.
+                    </td>
+                  </tr>
+                ) : null}
                 {snapshot.audits.map((audit) => (
                   <tr key={value(audit, "id")}>
                     <td data-label="When">{auditTime(audit.created_at)}</td>
                     <td data-label="Entity">
-                      {value(audit, "entity_name") || value(audit, "entity_type").replaceAll("_", " ")}
-                      <small>{value(audit, "entity_type").replaceAll("_", " ")}{value(audit, "entity_name") ? "" : ` · ${value(audit, "entity_id")}`}</small>
+                      {value(audit, "entity_name") ||
+                        value(audit, "entity_type").replaceAll("_", " ")}
+                      <small>
+                        {value(audit, "entity_type").replaceAll("_", " ")}
+                        {value(audit, "entity_name") ? "" : ` · ${value(audit, "entity_id")}`}
+                      </small>
                     </td>
                     <td data-label="Action">{value(audit, "action").replaceAll("_", " ")}</td>
-                    <td data-label="Actor">{value(audit, "actor_name") || value(audit, "actor_id")}</td>
+                    <td data-label="Actor">
+                      {value(audit, "actor_name") || value(audit, "actor_id")}
+                    </td>
                   </tr>
                 ))}
               </tbody>

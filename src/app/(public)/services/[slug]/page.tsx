@@ -112,26 +112,19 @@ function SlasOnlineContent() {
   );
 }
 
-function OtherFinancialAssistanceContent({
-  programs,
-}: {
-  programs: Pick<
-    import("@/src/types/domain").Program,
-    "id" | "name" | "slug" | "benefits" | "degreePrograms"
-  >[];
-}) {
+function OtherFinancialAssistanceContent({ programs }: { programs: Program[] }) {
   return (
     <>
       <section className="service-overview">
         <div>
-          <h2>Other financial assistance</h2>
+          <h2>Other Financial Assistance</h2>
           <p>
             Explore assistance programs available through the University of the Philippines Visayas
             and its partners.
           </p>
         </div>
         <div className="service-overview-note">
-          <strong>Program availability</strong>
+          <strong>Program Availability</strong>
           <p>
             Application periods and requirements may vary by program. Check the official
             announcement before applying.
@@ -251,7 +244,7 @@ function ShareLoanContent() {
         </div>
       </section>
       <section className="prose-section service-content-section">
-        <h2>Eligibility and approval</h2>
+        <h2>Eligibility and Approval</h2>
         <ul>
           <li>All bona fide students may apply.</li>
           <li>

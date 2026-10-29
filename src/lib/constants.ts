@@ -13,7 +13,7 @@ export const siteConfig = {
 };
 
 export const scholarshipCategories = [
-  { slug: "up-administered", label: "UP-administered" },
+  { slug: "up-administered", label: "UP-Administered" },
   { slug: "government", label: "Government" },
   { slug: "private", label: "Private" },
 ] as const;

@@ -1,21 +1,21 @@
 # UP Visayas OSA-SFAU website
 
-The official information website for the Scholarships and Financial Assistance Unit (SFAU) of the University of the Philippines Visayas Office of Student Affairs. Students can find scholarships, financial assistance, and other support services. Authorized staff use the admin workspace to maintain the information.
+The official information website for the Scholarships and Financial Assistance Unit (SFAU) of the University of the Philippines Visayas Office of Student Affairs. Students can find scholarships, financial assistance, and other support services. Authorized staff use the admin workspace to maintain the published information.
 
 ## Website
 
-- **Home:** service links, announcements, and recent published scholarships.
+- **Home:** service links, announcements, and featured published programs.
 - **Services:** information about SLAS Online, scholarships, other financial assistance, student assistantship, the SHARE Loan Program, and student insurance.
-- **Scholarships:** browse by administering category and filter by name, degree program, and application status. Program pages show details, requirements, benefits, and available application information.
-- **Search and About:** find published programs and services, and view the unit's mandate, staff, and contact details.
-- **Admin workspace:** manage programs, degree programs, application cycles, announcements, and the audit trail. Staff can preview content, publish or unpublish programs, and archive or restore records.
+- **Program directories and search:** browse or filter published scholarships and financial assistance by name, degree program, administering category, and application availability. Select a program to open its details in an accessible dialog. Program details are presented in the dialog rather than separate public detail routes.
+- **About:** read about the unit's mandate, staff, and contact details.
+- **Admin workspace:** authorized staff manage programs, degree programs, application cycles, announcements, and the audit trail. The workspace supports previews, publishing, unpublishing, archiving, and restoring records.
 
-Publishing a program does **not** mean applications are open. An application link is shown only when SFAU has verified the official HTTPS destination and application window and the cycle is eligible to open. Missing, invalid, unverified, or held cycles do not expose an application action.
+Publishing a program does **not** mean applications are open. An application action appears only when SFAU has verified the official HTTPS link and application window and the cycle is eligible to open. Missing, invalid, unverified, or held cycles do not expose an application action.
 
 ## Technology
 
 - Next.js App Router, React, and TypeScript
-- Tailwind CSS and HeroUI
+- Tailwind CSS, HeroUI, and Poppins typography
 - Neon Postgres for content and Neon Auth for staff sign-in
 
 Public content is read on the server. Admin operations require a Neon Auth session and an authorized entry in `admin_profiles`. The database connection is kept on the server.
@@ -35,7 +35,7 @@ Fill in `.env.local` with the values for your Neon project, then start the devel
 npm run dev
 ```
 
-Open <http://localhost:3000>. Without a configured or reachable database, database-backed sections display an error state instead of published content. Static service information remains in the application.
+Open <http://localhost:3000>. Without a configured or reachable database, database-backed sections display an error state instead of published content. Static service information remains available.
 
 ### Environment variables
 
@@ -75,7 +75,7 @@ The CMS validates slugs, application dates, HTTPS URLs, optional trusted origins
 
 ## Import scholarship source data
 
-The CSV importer defaults to a dry run. It checks the expected source columns, flags records for review, preserves source information, and creates no application cycles.
+The CSV importer defaults to a dry run. It checks the expected source columns, flags records for review, preserves source information, and creates no application cycles. Reports are written under the ignored `reports/` directory by default, so generated files are not committed.
 
 ```powershell
 node scripts/import-scholarships.mjs --input "path/to/scholarships.csv" --report reports/scholarship-import-report.json

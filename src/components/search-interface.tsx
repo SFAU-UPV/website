@@ -6,6 +6,7 @@ import { EmptyState } from "@/src/components/data-states";
 import { services, type Program } from "@/src/types/domain";
 import { formatProgramTitle } from "@/src/lib/format";
 import { Button } from "@heroui/react";
+import { ProgramDetailsLink } from "@/src/components/program-details-link";
 
 export function SearchInterface({
   programs,
@@ -24,7 +25,9 @@ export function SearchInterface({
     : [];
   const programResults = hasQuery
     ? programs.filter((program) =>
-        `${program.name} ${program.description ?? program.summary}`.toLowerCase().includes(normalized),
+        `${program.name} ${program.description ?? program.summary}`
+          .toLowerCase()
+          .includes(normalized),
       )
     : [];
   const resultCount = serviceResults.length + programResults.length;
@@ -59,7 +62,11 @@ export function SearchInterface({
       {hasQuery && resultCount > 0 ? (
         <div className="program-list">
           {serviceResults.map((service) => (
-            <Link className="card program-row" href={`/services/${service.slug}`} key={service.slug}>
+            <Link
+              className="card program-row"
+              href={`/services/${service.slug}`}
+              key={service.slug}
+            >
               <div>
                 <h2>{service.name}</h2>
                 <p>{service.description}</p>
@@ -67,24 +74,34 @@ export function SearchInterface({
               <span aria-hidden="true">→</span>
             </Link>
           ))}
-          {programResults.map((program) => (
-            <Link
-              className="card program-row"
-              href={
-                program.serviceSlug === "scholarships" ||
-                program.serviceSlug === "other-financial-assistance"
-                  ? `/services/${program.serviceSlug}/${program.slug}`
-                  : `/services/${program.serviceSlug}`
-              }
-              key={program.id}
-            >
-              <div>
-                <h2>{formatProgramTitle(program.name)}</h2>
-                {program.summary ? <p>{program.summary}</p> : null}
-              </div>
-              <span aria-hidden="true">→</span>
-            </Link>
-          ))}
+          {programResults.map((program) =>
+            program.serviceSlug === "scholarships" ||
+            program.serviceSlug === "other-financial-assistance" ? (
+              <ProgramDetailsLink
+                program={program}
+                className="card program-row search-program-row"
+                key={program.id}
+              >
+                <span>
+                  <strong>{formatProgramTitle(program.name)}</strong>
+                  {program.summary ? <span>{program.summary}</span> : null}
+                </span>
+                <span aria-hidden="true">→</span>
+              </ProgramDetailsLink>
+            ) : (
+              <Link
+                className="card program-row"
+                href={`/services/${program.serviceSlug}`}
+                key={program.id}
+              >
+                <div>
+                  <h2>{formatProgramTitle(program.name)}</h2>
+                  {program.summary ? <p>{program.summary}</p> : null}
+                </div>
+                <span aria-hidden="true">→</span>
+              </Link>
+            ),
+          )}
         </div>
       ) : hasQuery ? (
         <EmptyState

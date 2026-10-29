@@ -13,11 +13,13 @@
 /.next/
 /out/
 /build
+/dist/
 /test-results/
 /playwright-report/
 /blob-report/
 /reports/*
 !/reports/.gitkeep
+/.about-audit-temp/
 
 # Local environment files and secrets
 .env*
@@ -32,9 +34,12 @@
 
 # Deployment and local tooling
 /.vercel/
+/.netlify/
+/.output/
 /.codex/
 /.agents/
 /.turbo/
+/.swc/
 /anti-slop/
 /.impeccable/
 /impeccable/

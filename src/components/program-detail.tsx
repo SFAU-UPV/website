@@ -36,12 +36,6 @@ export function ProgramDetail({
   program: Program;
   breadcrumbs: { label: string; href?: string }[];
 }) {
-  const cycle = getPrimaryCycle(program);
-  const availability = resolveApplicationAvailability(cycle);
-  const applyEnabled = canApply(program, cycle);
-  const summary = program.summary?.trim();
-  const description = program.description?.trim();
-  const overview = description || summary;
   return (
     <>
       <section className="page-intro">
@@ -53,116 +47,130 @@ export function ProgramDetail({
       <section className="section">
         <div className="container detail-layout">
           <article>
-            <div className={`availability-panel availability-${availability}`}>
-              <strong>
-                {availability === "open"
-                  ? "Applications available"
-                  : availability === "upcoming"
-                    ? "Upcoming application"
-                    : availability === "closed"
-                      ? "Applications closed"
-                      : availability === "suspended"
-                        ? "Temporarily unavailable"
-                        : "Currently unavailable"}
-              </strong>
-              <p>{availabilityCopy[availability]}</p>
-              {applyEnabled && cycle?.externalApplicationUrl ? (
-                <a
-                  className="button button-primary"
-                  href={cycle.externalApplicationUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Apply Now <span aria-hidden="true">↗</span>
-                </a>
-              ) : (
-                <span className="availability-action">Application link unavailable</span>
-              )}
-            </div>
-            {overview ? (
-              <section className="prose-section" id="overview">
-                <h2>Overview</h2>
-                {summary && description && summary !== description ? <p>{summary}</p> : null}
-                <p>{overview}</p>
-              </section>
-            ) : null}
-            <ListSection id="eligibility" title="Eligibility" items={program.eligibility} />
-            <ListSection id="requirements" title="Requirements" items={program.requirements} />
-            <ListSection id="benefits" title="Benefits" items={program.benefits} />
-            {program.degreePrograms?.length ? (
-              <section className="prose-section" id="degrees">
-                <h2>Applicable degree programs</h2>
-                <ul>
-                  {program.degreePrograms.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </section>
-            ) : null}
-            <ListSection
-              id="application"
-              title="Application process"
-              items={program.applicationProcess}
-            />
-            {cycle?.startsOn || cycle?.endsOn ? (
-              <section className="prose-section" id="dates">
-                <h2>Application dates</h2>
-                <dl className="date-grid">
-                  {cycle.startsOn ? (
-                    <>
-                      <dt>Opens</dt>
-                      <dd>{cycle.startsOn}</dd>
-                    </>
-                  ) : null}
-                  {cycle.endsOn ? (
-                    <>
-                      <dt>Closes</dt>
-                      <dd>{cycle.endsOn}</dd>
-                    </>
-                  ) : null}
-                </dl>
-              </section>
-            ) : null}
-            {program.contact?.length || program.officialSourceUrl ? (
-              <section className="prose-section" id="contact">
-                <h2>Contact and official links</h2>
-                {program.contact?.map((item) => (
-                  <p key={item.label}>
-                    <strong>{item.label}</strong>
-                    <br />
-                    {item.href ? (
-                      <a className="text-link" href={item.href}>
-                        {item.value}
-                      </a>
-                    ) : (
-                      item.value
-                    )}
-                  </p>
-                ))}
-                {program.officialSourceUrl ? (
-                  <p>
-                    <a
-                      className="text-link"
-                      href={program.officialSourceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Visit official source ↗
-                    </a>
-                  </p>
-                ) : null}
-              </section>
-            ) : null}
-            {cycle?.linkType === "google-form" ? (
-              <p className="source-note">The application destination is a Google Form.</p>
-            ) : cycle?.linkType === "official-portal" ? (
-              <p className="source-note">
-                The application destination is recorded as an official external portal.
-              </p>
-            ) : null}
+            <ProgramDetailContent program={program} />
           </article>
         </div>
       </section>
+    </>
+  );
+}
+
+export function ProgramDetailContent({ program }: { program: Program }) {
+  const cycle = getPrimaryCycle(program);
+  const availability = resolveApplicationAvailability(cycle);
+  const applyEnabled = canApply(program, cycle);
+  const summary = program.summary?.trim();
+  const description = program.description?.trim();
+  const overview = description || summary;
+  return (
+    <>
+      <div className={`availability-panel availability-${availability}`}>
+        <strong>
+          {availability === "open"
+            ? "Applications available"
+            : availability === "upcoming"
+              ? "Upcoming application"
+              : availability === "closed"
+                ? "Applications closed"
+                : availability === "suspended"
+                  ? "Temporarily unavailable"
+                  : "Currently unavailable"}
+        </strong>
+        <p>{availabilityCopy[availability]}</p>
+        {applyEnabled && cycle?.externalApplicationUrl ? (
+          <a
+            className="button button-primary"
+            href={cycle.externalApplicationUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Apply Now <span aria-hidden="true">↗</span>
+          </a>
+        ) : (
+          <span className="availability-action">Application link unavailable</span>
+        )}
+      </div>
+      {overview ? (
+        <section className="prose-section" id="overview">
+          <h2>Overview</h2>
+          {summary && description && summary !== description ? <p>{summary}</p> : null}
+          <p>{overview}</p>
+        </section>
+      ) : null}
+      <ListSection id="eligibility" title="Eligibility" items={program.eligibility} />
+      <ListSection id="requirements" title="Requirements" items={program.requirements} />
+      <ListSection id="benefits" title="Benefits" items={program.benefits} />
+      {program.degreePrograms?.length ? (
+        <section className="prose-section" id="degrees">
+          <h2>Applicable degree programs</h2>
+          <ul>
+            {program.degreePrograms.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+      <ListSection
+        id="application"
+        title="Application process"
+        items={program.applicationProcess}
+      />
+      {cycle?.startsOn || cycle?.endsOn ? (
+        <section className="prose-section" id="dates">
+          <h2>Application dates</h2>
+          <dl className="date-grid">
+            {cycle.startsOn ? (
+              <>
+                <dt>Opens</dt>
+                <dd>{cycle.startsOn}</dd>
+              </>
+            ) : null}
+            {cycle.endsOn ? (
+              <>
+                <dt>Closes</dt>
+                <dd>{cycle.endsOn}</dd>
+              </>
+            ) : null}
+          </dl>
+        </section>
+      ) : null}
+      {program.contact?.length || program.officialSourceUrl ? (
+        <section className="prose-section" id="contact">
+          <h2>Contact and official links</h2>
+          {program.contact?.map((item) => (
+            <p key={item.label}>
+              <strong>{item.label}</strong>
+              <br />
+              {item.href ? (
+                <a className="text-link" href={item.href}>
+                  {item.value}
+                </a>
+              ) : (
+                item.value
+              )}
+            </p>
+          ))}
+          {program.officialSourceUrl ? (
+            <p>
+              <a
+                className="text-link"
+                href={program.officialSourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Visit official source ↗
+              </a>
+            </p>
+          ) : null}
+        </section>
+      ) : null}
+      {cycle?.linkType === "google-form" ? (
+        <p className="source-note">The application destination is a Google Form.</p>
+      ) : cycle?.linkType === "official-portal" ? (
+        <p className="source-note">
+          The application destination is recorded as an official external portal.
+        </p>
+      ) : null}
     </>
   );
 }
