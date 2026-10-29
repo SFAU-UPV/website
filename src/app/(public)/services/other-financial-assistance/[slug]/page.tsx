@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { ProgramDetail } from "@/src/components/program-detail";
 import { getPublicProgramsResult } from "@/src/lib/content";
 import { ErrorState } from "@/src/components/data-states";
@@ -22,9 +23,14 @@ export default async function OtherFinancialAssistanceDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  await connection();
   const result = await getPublicProgramsResult();
   if (result.status === "error") {
-    return <div className="container section"><ErrorState /></div>;
+    return (
+      <div className="container section">
+        <ErrorState />
+      </div>
+    );
   }
   const program = result.data.find(
     (item) => item.slug === slug && item.serviceSlug === "other-financial-assistance",

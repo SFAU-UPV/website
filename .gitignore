@@ -13,14 +13,22 @@
 /.next/
 /out/
 /build
+/test-results/
+/playwright-report/
+/blob-report/
 /reports/*
 !/reports/.gitkeep
 
 # Local environment files and secrets
 .env*
+!.env.example
 
 # Neon local project pointer; keep neon.ts and neon/migrations tracked
 /.neon
+
+# Supabase CLI local state; keep migrations, rollback scripts, and seed data tracked
+/supabase/.branches/
+/supabase/.temp/
 
 # Deployment and local tooling
 /.vercel/
@@ -28,7 +36,9 @@
 /.agents/
 /.turbo/
 /anti-slop/
+/.impeccable/
 /impeccable/
+/.carousel-check-temp/
 /graphify-out/
 .eslintcache
 
@@ -47,6 +57,3 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
-
-.vercel
-.env*

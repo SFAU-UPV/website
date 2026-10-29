@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { Breadcrumbs } from "@/src/components/breadcrumbs";
 import { AssistanceDirectory } from "@/src/components/assistance-directory";
 import {
@@ -378,6 +379,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
   const { slug } = await params;
   const service = services.find((item) => item.slug === slug && item.slug !== "scholarships");
   if (!service) notFound();
+  if (service.slug === "student-assistantship") await connection();
   const isSlas = service.slug === "slas-online";
   const isOtherFinancialAssistance = service.slug === "other-financial-assistance";
   const programResult = await getPublicProgramsResult();
@@ -405,7 +407,8 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
       />
       <section className="section">
         <div className="container service-detail-content">
-          {programResult.status === "error" && (isOtherFinancialAssistance || service.slug === "student-assistantship") ? (
+          {programResult.status === "error" &&
+          (isOtherFinancialAssistance || service.slug === "student-assistantship") ? (
             <ErrorState />
           ) : isSlas ? (
             <SlasOnlineContent />

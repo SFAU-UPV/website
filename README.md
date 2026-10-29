@@ -1,87 +1,116 @@
-# UP Visayas SFAU website
+# UP Visayas OSA-SFAU website
 
-Public information site foundation for the Scholarships and Financial Assistance Unit (SFAU), Office of Student Affairs, University of the Philippines Visayas.
+The official information website for the Scholarships and Financial Assistance Unit (SFAU) of the University of the Philippines Visayas Office of Student Affairs. Students can find scholarships, financial assistance, and other support services. Authorized staff use the admin workspace to maintain the information.
 
-## Requirements
+## Website
 
-- Node.js 20 LTS or newer
-- npm 10 or newer
-- Neon Postgres and Managed Neon Auth
+- **Home:** service links, announcements, and recent published scholarships.
+- **Services:** information about SLAS Online, scholarships, other financial assistance, student assistantship, the SHARE Loan Program, and student insurance.
+- **Scholarships:** browse by administering category and filter by name, degree program, and application status. Program pages show details, requirements, benefits, and available application information.
+- **Search and About:** find published programs and services, and view the unit's mandate, staff, and contact details.
+- **Admin workspace:** manage programs, degree programs, application cycles, announcements, and the audit trail. Staff can preview content, publish or unpublish programs, and archive or restore records.
+
+Publishing a program does **not** mean applications are open. An application link is shown only when SFAU has verified the official HTTPS destination and application window and the cycle is eligible to open. Missing, invalid, unverified, or held cycles do not expose an application action.
+
+## Technology
+
+- Next.js App Router, React, and TypeScript
+- Tailwind CSS and HeroUI
+- Neon Postgres for content and Neon Auth for staff sign-in
+
+Public content is read on the server. Admin operations require a Neon Auth session and an authorized entry in `admin_profiles`. The database connection is kept on the server.
 
 ## Local development
 
-```bash
-npm install
-copy .env.example .env.local
+Use Node.js 22 or newer and npm. Node.js 22 is needed for the test command's TypeScript stripping option. A Neon Postgres database and Neon Auth are needed for database-backed content and the admin workspace.
+
+```powershell
+npm ci
+Copy-Item .env.example .env.local
+```
+
+Fill in `.env.local` with the values for your Neon project, then start the development server:
+
+```powershell
 npm run dev
 ```
 
-Open `http://localhost:3000`. The current phase uses typed placeholder data and intentionally does not make current-availability claims.
+Open <http://localhost:3000>. Without a configured or reachable database, database-backed sections display an error state instead of published content. Static service information remains in the application.
+
+### Environment variables
+
+| Variable                        | Purpose                                                                                             |
+| ------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                  | Pooled Neon connection used by the application.                                                     |
+| `DATABASE_URL_UNPOOLED`         | Direct connection for migrations and imports.                                                       |
+| `NEON_AUTH_BASE_URL`            | Neon Auth service URL.                                                                              |
+| `NEON_AUTH_COOKIE_SECRET`       | Server-side secret used for auth cookies.                                                           |
+| `SFAU_TRUSTED_EXTERNAL_ORIGINS` | Optional comma-separated list of approved HTTPS origins for application, image, and document links. |
+
+Use `.env.example` as the template. Keep real connection strings and secrets in local or hosting environment settings; do not commit them.
+
+### Database setup
+
+For a new database, apply the SQL files in order using a direct connection. The seed file is under `supabase/` for historical reasons and inserts only the service and scholarship categories. Set `DATABASE_URL_UNPOOLED` in your shell first; values in `.env.local` are not automatically loaded by `psql`.
+
+```powershell
+psql $env:DATABASE_URL_UNPOOLED -v ON_ERROR_STOP=1 -f neon/migrations/0001_sfau.sql
+psql $env:DATABASE_URL_UNPOOLED -v ON_ERROR_STOP=1 -f supabase/seed.sql
+psql $env:DATABASE_URL_UNPOOLED -v ON_ERROR_STOP=1 -f neon/migrations/0002_assign_service_categories.sql
+```
+
+The first migration creates the schema and is not intended to be rerun on an existing database. Apply only migrations that have not already been applied. The second migration assigns service categories to existing imported records; run it after the categories exist. Review migrations and use a disposable branch when testing changes.
+
+## Staff access and content workflow
+
+1. Create or invite a staff user in Neon Auth, or use `/admin/setup` when setting up a sign-in. A sign-in account alone does not grant CMS access.
+2. Have a database administrator add the Neon Auth user ID, display name, and `administrator` or `editor` role to `admin_profiles`. Sign in at `/admin/login`.
+3. In **Programs**, create a draft with a stable lowercase slug, service and scholarship categories, and the applicable details and degree programs. Review the content before publishing.
+4. In **Application cycles**, enter the dates, link type, and official HTTPS application URL. Confirm verification only after SFAU checks the destination and window. Editing a cycle requires fresh confirmation; saving without it returns the cycle to unverified. Use the hold or close override when applications must stop.
+5. Manage published records with **Unpublish**, **Archive**, and **Restore**. Restore returns a record to draft. Normal workflows archive records; database triggers block hard deletion of programs, cycles, and announcements.
+6. Create announcements as drafts and publish them after review. Scheduled publishing is not enabled; the database field is reserved for a future scheduler.
+7. Review the **Audit trail** after material changes. It records the actor, action, time, and relevant before and after data.
+
+The CMS validates slugs, application dates, HTTPS URLs, optional trusted origins, and content at the server boundary. Scholarship records should be reviewed by SFAU before publication.
+
+## Import scholarship source data
+
+The CSV importer defaults to a dry run. It checks the expected source columns, flags records for review, preserves source information, and creates no application cycles.
+
+```powershell
+node scripts/import-scholarships.mjs --input "path/to/scholarships.csv" --report reports/scholarship-import-report.json
+```
+
+After reviewing the report and approving the import, run:
+
+```powershell
+node scripts/import-scholarships.mjs --input "path/to/scholarships.csv" --report reports/scholarship-import-report.json --apply
+```
+
+`--apply` needs `DATABASE_URL_UNPOOLED` or `DATABASE_URL` in a trusted CLI environment. It creates draft programs and source records; SFAU must review and publish the content and separately verify application cycles.
+
+## Images and project structure
+
+- `public/upvhero.jpg` and `public/upv-logo.jpg`: shared hero and institutional mark.
+- `public/services/`: images for the service cards and homepage carousel. Replace an image using its existing filename, or update the image mappings in `src/components/service-carousel.tsx` and `src/app/(public)/services/page.tsx`.
+- `public/about/team/`: staff photographs shown on the About page.
+- `src/app/`: public pages, admin routes, API routes, and global styles.
+- `src/components/`: shared UI, directories, carousel, and admin forms.
+- `src/lib/`: content queries, authentication, validation, and admin actions.
+- `neon/migrations/`: current Neon schema and data migrations. `supabase/migrations/` contains the earlier Supabase implementation.
+- `scripts/`: the scholarship CSV importer and its tests.
+
+Check that institutional marks and staff photographs are approved for their intended use before replacing or reusing them.
 
 ## Commands
 
-```bash
-npm run typecheck
-npm run lint
-npm run test
-npm run build
+```powershell
+npm run dev        # Start the development server
+npm run build      # Build for production
+npm run start      # Start a production build
+npm run lint       # Run ESLint
+npm run typecheck  # Check TypeScript
+npm run test       # Run the Node.js tests
 ```
 
-When Neon is linked:
-
-```bash
-neon deploy
-neon env pull
-psql "$DATABASE_URL_UNPOOLED" -f neon/migrations/0001_sfau.sql
-```
-
-## SFAU CMS
-
-Apply `neon/migrations/0001_sfau.sql` with the direct/unpooled connection. Set `SFAU_TRUSTED_EXTERNAL_ORIGINS` in the server environment to a comma-separated list of approved HTTPS origins when the unit wants to restrict application, document, and image links. Neon Auth supplies the administrator session; the app never exposes `DATABASE_URL` to the browser.
-
-Create or invite the administrator in Neon Auth, then insert the matching Neon Auth user ID into `admin_profiles` with role `administrator` or `editor`. Open `/admin/login`; the CMS fails closed when the account is not present in `admin_profiles`.
-
-### Administrative SOP
-
-1. Sign in at `/admin/login` with the approved Neon Auth administrator account.
-2. In **Programs**, add a record with a stable lowercase slug, map its service and scholarship categories, enter one item per line for list content, and save it as a draft.
-3. Use the program editor to review the preview-equivalent content, then use **Publish** only when the public wording is approved. Publishing does not open applications.
-4. In **Application cycles**, create a cycle for the academic year. Enter both dates, choose the link type, and add the official HTTPS application URL. Check the verification confirmation only after SFAU verifies the destination and window. Editing a cycle requires a fresh confirmation; saving without it returns the cycle to unverified. Edit or archive cycles from the list. Use a hold/close override for a temporary stop. A missing, invalid, unverified, or held cycle cannot expose **Apply Now**.
-5. Use **Unpublish**, **Archive**, and **Restore** from the program list. Archive is a soft-delete state; hard deletes are blocked by the database trigger.
-6. In **Announcements**, create or edit the title, summary, and content. Save as draft, then publish manually after review. Scheduling is intentionally not enabled because this deployment has no reliable background scheduler; `scheduled_at` remains available for a future infrastructure-backed phase.
-7. Review **Audit trail** after material changes. It records the actor, timestamp, action, and minimal before/after data. Audit rows are protected by RLS and are not public content.
-
-CMS validation rejects non-HTTPS URLs, disallowed origins when configured, unsafe rich-text tags/protocols, invalid slugs, duplicate slugs, summaries over 500 characters, and reversed application windows. Restore returns a record to draft so it cannot accidentally become public.
-
-The seed file contains only the six approved service groups and three scholarship categories. Scholarship records are intentionally not seeded until SFAU verifies the supplied CSV and PDF values.
-
-For a local rollback during development, use a disposable Neon branch and reapply `neon/migrations/0001_sfau.sql`. Production rollback is manual and review-gated; inspect the migration before applying the corresponding reverse SQL rather than deleting records. Normal admin workflows archive records instead of hard-deleting them, and the Neon migration blocks hard deletes.
-
-## Source-data import
-
-The importer reads the exact scholarship CSV columns and defaults to dry-run. It preserves raw source payloads, generates stable IDs/slugs, detects duplicates and category references, flags instructions such as `Apply directly at CHED` or `SIKAP` as non-proof of availability, and creates no application cycles.
-
-```bash
-node scripts/import-scholarships.mjs --input "C:\Users\Lenovo\Downloads\UP Visayas List of Scholarships - Sheet1.csv" --report reports/scholarship-import-report.json
-```
-
-After the dry-run report is reviewed and an administrator approves the import:
-
-```bash
-node scripts/import-scholarships.mjs --input "C:\Users\Lenovo\Downloads\UP Visayas List of Scholarships - Sheet1.csv" --report reports/scholarship-import-report.json --apply
-```
-
-`--apply` requires `DATABASE_URL_UNPOOLED` (or `DATABASE_URL`) and must run in a trusted CLI environment. It creates draft programs and provenance records only; application links and cycles remain unverified until SFAU adds them.
-
-## Conventions
-
-Use Server Components by default, keep public content server-filtered, validate all admin inputs at the boundary, and record administrative changes. Use stable kebab-case slugs. Never infer an open application from the source CSV alone. Keep secrets in environment variables and never commit `.env.local`.
-
-## Roadmap
-
-1. Foundation, visual system, routes, domain plan, and initial migration.
-2. Neon schema integration, seeded verified source data, and Neon Auth administrator authentication.
-3. Admin CRUD for programs, cycles, links, announcements, and audit history.
-4. Accessibility and end-to-end coverage, deployment documentation, and SFAU staff handoff.
-
-See [`docs/ADR-0001-foundation.md`](docs/ADR-0001-foundation.md) for the architecture decision record.
+The historical architecture decision record is in [docs/ADR-0001-foundation.md](docs/ADR-0001-foundation.md); its database and authentication choices have been superseded by the current Neon implementation.

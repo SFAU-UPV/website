@@ -257,7 +257,11 @@ select:focus-visible {
 .footer-brand {
   display: flex;
   align-items: center;
+  min-width: 0;
   gap: 0.8rem;
+}
+.footer-brand > div {
+  min-width: 0;
 }
 .footer-brand img {
   border-radius: 50%;
@@ -273,6 +277,7 @@ select:focus-visible {
 .footer-brand span {
   color: #f9e6c8;
   font-size: 0.85rem;
+  overflow-wrap: anywhere;
 }
 .footer-contact {
   gap: 1.25rem;
@@ -287,6 +292,10 @@ select:focus-visible {
   font-style: normal;
   font-size: 0.9rem;
   line-height: 1.5;
+}
+.footer-contact address > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .footer-contact address > span:first-child {
   flex-basis: 100%;
@@ -764,7 +773,12 @@ select:focus-visible {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(105deg, rgba(6, 59, 45, 0.98) 0%, rgba(6, 59, 45, 0.9) 48%, rgba(6, 59, 45, 0.55) 100%),
+    linear-gradient(
+      105deg,
+      rgba(6, 59, 45, 0.98) 0%,
+      rgba(6, 59, 45, 0.9) 48%,
+      rgba(6, 59, 45, 0.55) 100%
+    ),
     url("/upvhero.jpg") center 52% / cover no-repeat;
   content: "";
 }
@@ -1382,7 +1396,9 @@ select:focus-visible {
 }
 .featured-opportunity-copy strong {
   color: var(--maroon-900);
-  font: 700 1.15rem/1.2 Georgia, serif;
+  font:
+    700 1.15rem/1.2 Georgia,
+    serif;
   overflow-wrap: anywhere;
 }
 .featured-opportunity-copy span {
@@ -1418,7 +1434,9 @@ select:focus-visible {
 .home-closing h2 {
   margin: 0 0 0.45rem;
   color: white;
-  font: 700 clamp(1.8rem, 3vw, 2.6rem)/1.1 Georgia, serif;
+  font:
+    700 clamp(1.8rem, 3vw, 2.6rem)/1.1 Georgia,
+    serif;
 }
 .home-closing p {
   max-width: 54ch;
@@ -1694,7 +1712,7 @@ select:focus-visible {
     line-height: 1.3;
   }
   .brand small {
-    font-size: 0.875rem;
+    font-size: clamp(0.72rem, 2vw, 0.8rem);
     line-height: 1.3;
   }
   .mobile-nav {
@@ -3036,12 +3054,24 @@ select:focus-visible {
   text-decoration: underline;
   text-underline-offset: 0.2em;
 }
-.admin-program-table th:nth-child(1) { width: 31%; }
-.admin-program-table th:nth-child(2) { width: 13%; }
-.admin-program-table th:nth-child(3) { width: 10%; }
-.admin-program-table th:nth-child(4) { width: 11%; }
-.admin-program-table th:nth-child(5) { width: 10%; }
-.admin-program-table th:nth-child(6) { width: 25%; }
+.admin-program-table th:nth-child(1) {
+  width: 31%;
+}
+.admin-program-table th:nth-child(2) {
+  width: 13%;
+}
+.admin-program-table th:nth-child(3) {
+  width: 10%;
+}
+.admin-program-table th:nth-child(4) {
+  width: 11%;
+}
+.admin-program-table th:nth-child(5) {
+  width: 10%;
+}
+.admin-program-table th:nth-child(6) {
+  width: 25%;
+}
 .admin-program-table td:nth-child(5) {
   white-space: nowrap;
 }
@@ -3520,4 +3550,233 @@ button:not(.menu-button):not(.carousel-dot) {
 
 button:not(.menu-button):not(.carousel-dot):hover {
   box-shadow: 0 6px 16px rgba(45, 25, 10, 0.16);
+}
+
+/* Reflow shared navigation and wide public sections before their content gets cramped. */
+main,
+main > section,
+main article,
+main .container,
+.admin-console,
+.admin-program-editor-page {
+  min-width: 0;
+}
+
+img,
+video,
+iframe {
+  max-width: 100%;
+}
+
+@media (max-width: 1180px) {
+  .header-inner {
+    min-height: 68px;
+    flex-direction: row;
+    align-items: center;
+    padding-block: 0.7rem;
+  }
+
+  .brand {
+    min-width: 0;
+    flex: 1 1 auto;
+    gap: 0.6rem;
+  }
+
+  .brand > span {
+    min-width: 0;
+  }
+
+  .brand strong,
+  .brand small {
+    overflow-wrap: anywhere;
+  }
+
+  .primary-nav {
+    display: none;
+  }
+
+  .mobile-nav {
+    position: relative;
+    z-index: 40;
+    display: block;
+    align-self: center;
+    margin: 0 0 0 auto;
+  }
+
+  .menu-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .mobile-menu {
+    top: calc(100% + 0.75rem);
+    right: 0;
+    left: auto;
+    width: min(18rem, calc(100vw - 1.5rem));
+    max-height: calc(100dvh - 6rem);
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .support-rail-inner {
+    grid-template-columns: 150px minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .support-rail-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .footer-inner {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem clamp(1.25rem, 4vw, 3rem);
+  }
+
+  .footer-contact {
+    grid-column: 1 / -1;
+  }
+
+  .home-closing-inner {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .service-overview {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .service-overview-note {
+    padding: 1rem 0 0;
+    border-top: 1px solid #bdd0c0;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .support-rail-inner {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .support-rail-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .footer-inner {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+    padding-block: 2.5rem;
+  }
+
+  .footer-contact {
+    grid-column: auto;
+  }
+
+  .footer-bottom .container {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .footer-bottom-links {
+    justify-content: flex-start;
+  }
+
+  .home-closing-inner {
+    padding-block: 2.25rem;
+  }
+
+  .service-detail-content {
+    width: 100%;
+    margin-inline: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .container,
+  .hero > .container {
+    width: min(100% - 1.25rem, 620px);
+  }
+
+  .brand-mark {
+    width: 36px;
+    height: 36px;
+  }
+
+  .brand strong {
+    font-size: 0.82rem;
+  }
+
+  .brand small {
+    font-size: 0.75rem;
+  }
+
+  .header-inner {
+    gap: 0.5rem;
+  }
+
+  .brand {
+    gap: 0.5rem;
+  }
+
+  .brand small {
+    line-height: 1.25;
+  }
+
+  .hero .hero-button {
+    width: 100%;
+    flex-basis: 100%;
+  }
+
+  .admin-table td {
+    grid-template-columns: minmax(5.25rem, 34%) minmax(0, 1fr);
+    gap: 0.5rem;
+    padding-inline: 0.65rem;
+  }
+
+  .result-bar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* Wide displays gain room for layouts and larger controls without letting reading measures run away. */
+@media (min-width: 1440px) {
+  html {
+    font-size: clamp(16px, calc(0.208vw + 13px), 18px);
+  }
+
+  .container {
+    width: min(1640px, calc(100% - clamp(6rem, 8vw, 9rem)));
+  }
+
+  .service-carousel {
+    width: 100%;
+  }
+
+  .service-slide {
+    min-height: clamp(300px, 22vw, 380px);
+  }
+
+  .brand-mark {
+    width: clamp(46px, 2.4vw, 56px);
+    height: clamp(46px, 2.4vw, 56px);
+  }
+
+  .header-inner {
+    gap: clamp(2rem, 3vw, 3.5rem);
+  }
+
+  .primary-nav {
+    gap: clamp(2rem, 3vw, 3.5rem);
+  }
+
+  .footer-brand img {
+    width: clamp(48px, 2.5vw, 58px);
+    height: auto;
+    flex: 0 0 auto;
+  }
 }
