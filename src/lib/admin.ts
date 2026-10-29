@@ -1,6 +1,6 @@
 ﻿"use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { auth, isNeonAuthConfigured } from "@/src/lib/auth/server";
 import { getNeonSql, isNeonConfigured } from "@/src/lib/neon/db";
 
@@ -202,6 +202,7 @@ export async function saveProgramAction(form: FormData): Promise<AdminActionStat
       )
     )[0];
     if (!updatedProgram) throw new Error("Saved program could not be reloaded.");
+    updateTag("public-programs");
     revalidatePath("/admin");
     revalidatePath("/");
     revalidatePath("/services");
@@ -249,6 +250,7 @@ export async function changeProgramStateAction(form: FormData): Promise<AdminAct
       before,
       after,
     );
+    updateTag("public-programs");
     revalidatePath("/");
     revalidatePath("/services");
     revalidatePath("/services/scholarships");
@@ -323,6 +325,7 @@ export async function saveCycleAction(form: FormData): Promise<AdminActionState>
       null,
       { id: row.id, program_id: programId, verification_state: row.verification_state },
     );
+    updateTag("public-programs");
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/services/scholarships");
@@ -352,6 +355,7 @@ export async function archiveCycleAction(form: FormData): Promise<AdminActionSta
     ))[0];
     if (!after) throw new Error("Application cycle could not be archived.");
     await audit(sql, String(user.id), "application_cycle", id, "archived", before, after);
+    updateTag("public-programs");
     revalidatePath("/admin");
     revalidatePath("/");
     revalidatePath("/services/scholarships");
@@ -399,6 +403,7 @@ export async function saveAnnouncementAction(form: FormData): Promise<AdminActio
       null,
       { id: row.id, title: row.title, publication_status: row.publication_status },
     );
+    updateTag("public-announcements");
     revalidatePath("/");
     revalidatePath("/admin");
     return { ok: true, message: id ? "Announcement updated." : "Announcement saved." };
@@ -438,6 +443,7 @@ export async function changeAnnouncementStateAction(form: FormData): Promise<Adm
       before,
       after,
     );
+    updateTag("public-announcements");
     revalidatePath("/");
     revalidatePath("/admin");
     return { ok: true, message: `Announcement ${next}.` };

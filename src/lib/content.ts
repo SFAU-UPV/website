@@ -1,3 +1,4 @@
+import { cacheLife, cacheTag } from "next/cache";
 import { getNeonSql, isNeonConfigured } from "@/src/lib/neon/db";
 import {
   normalizeDegreePrograms,
@@ -111,13 +112,20 @@ export type PublicContentResult<T> =
   | { status: "ready"; data: T }
   | { status: "error"; data: T };
 
+async function getCachedPublicPrograms(): Promise<Program[]> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("public-programs");
+  const rows = (await getNeonSql().query(
+      `select p.id, p.slug, p.name, p.created_at, p.summary, p.description, p.publication_status, p.eligibility, p.requirements, p.benefits, p.degree_programs, p.application_process, p.contact, p.official_source_url, sc.slug as service_slug, coalesce(array_agg(distinct sh.slug::text) filter (where sh.slug is not null), '{}') as category_slugs, coalesce(jsonb_agg(distinct jsonb_build_object('id', ac.id, 'program_id', ac.program_id, 'verified_open_at', ac.verified_open_at, 'close_at', ac.close_at, 'external_url', ac.external_url, 'link_type', ac.link_type, 'verification_state', ac.verification_state, 'admin_override', ac.admin_override)) filter (where ac.id is not null), '[]') as application_cycles from programs p left join service_categories sc on sc.id = p.service_category_id left join program_category_links pcl on pcl.program_id = p.id left join scholarship_categories sh on sh.id = pcl.category_id left join application_cycles ac on ac.program_id = p.id and ac.archived_at is null where p.publication_status = 'published' and p.archived_at is null group by p.id, sc.slug order by p.name`,
+    )) as unknown as DbProgram[];
+  return rows.map(mapProgram);
+}
+
 export async function getPublicProgramsResult(): Promise<PublicContentResult<Program[]>> {
   if (!isNeonConfigured()) return { status: "error", data: [] };
   try {
-    const rows = (await getNeonSql().query(
-      `select p.id, p.slug, p.name, p.created_at, p.summary, p.description, p.publication_status, p.eligibility, p.requirements, p.benefits, p.degree_programs, p.application_process, p.contact, p.official_source_url, sc.slug as service_slug, coalesce(array_agg(distinct sh.slug::text) filter (where sh.slug is not null), '{}') as category_slugs, coalesce(jsonb_agg(distinct jsonb_build_object('id', ac.id, 'program_id', ac.program_id, 'verified_open_at', ac.verified_open_at, 'close_at', ac.close_at, 'external_url', ac.external_url, 'link_type', ac.link_type, 'verification_state', ac.verification_state, 'admin_override', ac.admin_override)) filter (where ac.id is not null), '[]') as application_cycles from programs p left join service_categories sc on sc.id = p.service_category_id left join program_category_links pcl on pcl.program_id = p.id left join scholarship_categories sh on sh.id = pcl.category_id left join application_cycles ac on ac.program_id = p.id and ac.archived_at is null where p.publication_status = 'published' and p.archived_at is null group by p.id, sc.slug order by p.name`,
-    )) as unknown as DbProgram[];
-    return { status: "ready", data: rows.map(mapProgram) };
+    return { status: "ready", data: await getCachedPublicPrograms() };
   } catch (error) {
     console.warn("Neon public programs query unavailable.", error);
     return { status: "error", data: [] };
@@ -135,10 +143,11 @@ export async function getPublicServiceProgram(slug: string): Promise<Program | u
   );
 }
 
-export async function getPublicAnnouncementsResult(): Promise<PublicContentResult<Announcement[]>> {
-  if (!isNeonConfigured()) return { status: "error", data: [] };
-  try {
-    const rows = (await getNeonSql().query(
+async function getCachedPublicAnnouncements(): Promise<Announcement[]> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("public-announcements");
+  const rows = (await getNeonSql().query(
       `select id, title, summary, body, pinned, published_at, scheduled_at from announcements where publication_status = 'published' and archived_at is null and (scheduled_at is null or scheduled_at <= now()) order by pinned desc, coalesce(published_at, created_at) desc`,
     )) as unknown as {
       id: string;
@@ -149,17 +158,20 @@ export async function getPublicAnnouncementsResult(): Promise<PublicContentResul
       published_at: string;
       scheduled_at: string | null;
     }[];
-    return {
-      status: "ready",
-      data: rows.map((row) => ({
+  return rows.map((row) => ({
         id: row.id,
         title: row.title,
         summary: row.summary,
         body: row.body ?? undefined,
         pinned: row.pinned,
         publishedAt: row.published_at,
-      })),
-    };
+      }));
+}
+
+export async function getPublicAnnouncementsResult(): Promise<PublicContentResult<Announcement[]>> {
+  if (!isNeonConfigured()) return { status: "error", data: [] };
+  try {
+    return { status: "ready", data: await getCachedPublicAnnouncements() };
   } catch (error) {
     console.warn("Neon public announcements query unavailable.", error);
     return { status: "error", data: [] };

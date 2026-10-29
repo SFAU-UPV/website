@@ -187,7 +187,6 @@ export function ServiceCarousel() {
                     {service.name}
                   </span>
                   <span className="service-slide-description">{service.description}</span>
-                  <span className="service-slide-action">View service</span>
                 </span>
               </Link>
             </Card>
