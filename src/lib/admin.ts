@@ -3,6 +3,7 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { auth, isNeonAuthConfigured } from "@/src/lib/auth/server";
 import { getNeonSql, isNeonConfigured } from "@/src/lib/neon/db";
+import { readProgramList as list } from "@/src/lib/program-form-data";
 
 export type AdminActionState = {
   ok: boolean;
@@ -14,16 +15,6 @@ export type AdminActionState = {
 type Row = Record<string, unknown>;
 type Sql = ReturnType<typeof getNeonSql>;
 const text = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
-const list = (form: FormData, key: string) => {
-  const repeated = form
-    .getAll(`${key}_items`)
-    .filter((item): item is string => typeof item === "string");
-  const values = repeated.length ? repeated : [text(form, key)];
-  return values
-    .flatMap((item) => item.split(/\r?\n/))
-    .map((item) => item.trim())
-    .filter(Boolean);
-};
 const nullable = (value: string) => value || null;
 function sanitize(value: string) {
   return value
@@ -167,6 +158,12 @@ export async function getAdminProgramPreview(id: string) {
 export async function saveProgramAction(form: FormData): Promise<AdminActionState> {
   try {
     const { sql, user } = await requireAdmin();
+    const fieldErrors: Record<string, string> = {};
+    if (!text(form, "name")) fieldErrors.name = "Enter a program name.";
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(text(form, "slug"))) {
+      fieldErrors.slug = "Use lowercase letters, numbers, and single hyphens.";
+    }
+    if (Object.keys(fieldErrors).length) return { ok: false, error: "Check the highlighted fields.", fieldErrors };
     const id = text(form, "id"),
       payload = programPayload(form);
     let rows: Row[];
@@ -190,8 +187,8 @@ export async function saveProgramAction(form: FormData): Promise<AdminActionStat
     ];
     if (id)
       rows = await sql.query(
-        "update programs set name=$1,slug=$2,summary=$3,description=$4,service_category_id=$5,publication_status=$6::publication_status,featured=$7,display_priority=$8,eligibility=$9,requirements=$10,benefits=$11,degree_programs=$12,application_process=$13,official_source_url=$14,image_url=$15,document_urls=$16,updated_at=now(),archived_at=case when $6::publication_status='archived' then coalesce(archived_at, now()) else null end where id=$17 returning *",
-        [...params, id],
+        "update programs set name=$1,slug=$2,summary=$3,description=$4,service_category_id=$5,publication_status=$6::publication_status,featured=$7,display_priority=$8,eligibility=$9,requirements=$10,benefits=$11,degree_programs=$12,application_process=$13,updated_at=now(),archived_at=case when $6::publication_status='archived' then coalesce(archived_at, now()) else null end where id=$14 returning *",
+        [...params.slice(0, 13), id],
       );
     else
       rows = await sql.query(

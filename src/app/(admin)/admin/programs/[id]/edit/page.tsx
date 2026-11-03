@@ -21,8 +21,7 @@ export default async function EditProgramPage({ params }: { params: Promise<{ id
       <div className="container">
         <div className="admin-page-header">
           <div>
-            <h1>Programs</h1>
-            <p>Edit program information.</p>
+            <p>OSA-SFAU content workspace</p>
           </div>
           <AdminSignOutButton />
         </div>

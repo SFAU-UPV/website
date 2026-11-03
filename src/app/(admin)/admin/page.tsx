@@ -4,7 +4,7 @@ import { getAdminSnapshot } from "@/src/lib/admin";
 
 export const instant = false;
 
-export default async function AdminPage({ searchParams }: { searchParams: Promise<{ tab?: string; newCycleFor?: string }> }) {
+export default async function AdminPage({ searchParams }: { searchParams: Promise<{ tab?: string; newCycleFor?: string; programId?: string }> }) {
   const params = await searchParams;
   const allowedTabs = ["overview", "programs", "cycles", "announcements", "audit"] as const;
   const initialTab = allowedTabs.includes(params.tab as typeof allowedTabs[number]) ? params.tab as typeof allowedTabs[number] : "overview";
@@ -26,7 +26,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             </div>
             <AdminSignOutButton />
           </div>
-          <AdminConsole snapshot={snapshot} initialTab={initialTab} newCycleFor={params.newCycleFor} />
+          <AdminConsole snapshot={snapshot} initialTab={initialTab} newCycleFor={params.newCycleFor} cycleProgramId={params.programId} />
         </div>
       </section>
     );

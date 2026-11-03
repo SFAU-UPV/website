@@ -19,8 +19,7 @@ export default async function NewProgramPage() {
       <div className="container">
         <div className="admin-page-header">
           <div>
-            <h1>Programs</h1>
-            <p>Create and review program information.</p>
+            <p>OSA-SFAU content workspace</p>
           </div>
           <AdminSignOutButton />
         </div>

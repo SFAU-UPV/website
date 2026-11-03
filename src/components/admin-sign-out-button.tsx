@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@heroui/react";
 import { authClient } from "@/src/lib/auth/client";
+import { requestEditorLeave } from "@/src/components/admin-editor-guard";
 
 export function AdminSignOutButton() {
   const router = useRouter();
@@ -11,6 +12,7 @@ export function AdminSignOutButton() {
   const [error, setError] = useState("");
 
   async function signOut() {
+    if (busy || !requestEditorLeave()) return;
     setBusy(true);
     setError("");
     try {

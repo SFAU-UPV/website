@@ -3057,6 +3057,104 @@ select:focus-visible {
 
 .admin-program-editor-heading {
   margin-bottom: 1.5rem;
+  overflow-wrap: anywhere;
+}
+.admin-program-editor-heading h1 {
+  margin: 0 0 0.75rem;
+  color: var(--maroon-900);
+  font-family: var(--font-sans);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+#program-editor-form .button {
+  box-shadow: none;
+  transform: none;
+}
+#program-editor-form .button--primary {
+  --button-bg: var(--maroon-700);
+  --button-bg-hover: var(--maroon-900);
+  --button-fg: white;
+}
+#program-editor-form .button--outline {
+  --button-bg: var(--paper);
+  --button-bg-hover: var(--canvas);
+  --button-bg-pressed: var(--canvas);
+  --button-fg: var(--maroon-900);
+  color: var(--maroon-900);
+  border-color: var(--line);
+}
+#program-editor-form .button--ghost {
+  --button-fg: var(--maroon-900);
+  color: var(--maroon-900);
+}
+#program-editor-form :is(input, textarea) {
+  font-weight: 400;
+  line-height: 1.5;
+  box-shadow: none;
+}
+#program-editor-form h2 {
+  font-weight: 650;
+}
+#program-editor-form a {
+  color: var(--maroon-700);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.admin-program-inputs {
+  display: grid;
+  gap: 1.5rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.admin-publication-tools {
+  display: grid;
+  gap: 0.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+.admin-program-inputs .admin-form-grid > *,
+.admin-program-section > * {
+  min-width: 0;
+}
+.admin-program-section p {
+  margin: 0;
+}
+.admin-advanced-fields {
+  display: grid;
+  gap: 1rem;
+  padding-top: 1rem;
+}
+.admin-list-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.admin-optional {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+.admin-program-form .admin-structured-list {
+  padding: 0.75rem 0;
+  border: 0;
+  border-radius: 0;
+}
+.admin-program-form .admin-structured-list legend {
+  padding: 0;
+}
+.admin-program-form .admin-list-item-actions {
+  margin-top: 0.25rem;
+}
+.admin-program-form .admin-structured-list textarea {
+  min-height: 4.5rem;
+}
+.admin-program-form .admin-editor-advanced summary:focus-visible {
+  outline: 2px solid var(--maroon-700);
+  outline-offset: 4px;
 }
 
 .admin-program-editor-heading a {
@@ -3181,6 +3279,14 @@ select:focus-visible {
     align-items: stretch;
     flex-direction: column;
   }
+  .admin-program-form .admin-program-savebar {
+    position: static;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+  .admin-program-form .admin-program-savebar .admin-actions {
+    flex-wrap: wrap;
+  }
 }
 .admin-editor {
   margin-bottom: 1.5rem;
@@ -3270,7 +3376,8 @@ select:focus-visible {
   padding: 0.65rem 0.75rem;
   font: inherit;
 }
-.admin-dropdown-trigger[data-slot="dropdown-trigger"] {
+.admin-dropdown-trigger[data-slot="dropdown-trigger"],
+.admin-degree-field .admin-dropdown-trigger {
   display: flex !important;
   width: 100% !important;
   min-height: 2.75rem;
@@ -3325,19 +3432,84 @@ select:focus-visible {
   gap: 0.35rem;
   min-width: 0;
 }
-.admin-degree-field .admin-degree-selection {
+.admin-degree-field .admin-dropdown-trigger {
   min-width: 0;
-  overflow: hidden;
+  max-width: 100%;
+}
+.admin-program-form .admin-degree-field button.admin-dropdown-trigger[data-slot="button"] {
+  min-height: 2.75rem;
+  justify-content: space-between;
+  border: 1px solid #cfc7bb !important;
+  border-radius: 0.45rem !important;
+  background: white !important;
+  color: var(--ink) !important;
+  padding: 0.65rem 0.75rem !important;
+  font: inherit !important;
+  text-align: left;
+}
+.admin-program-form .admin-degree-field button.admin-dropdown-trigger[data-slot="button"]:hover,
+.admin-program-form .admin-degree-field button.admin-dropdown-trigger[data-slot="button"][data-focus-visible="true"] {
+  border-color: var(--maroon-700) !important;
+  box-shadow: 0 0 0 3px rgb(117 18 29 / 12%) !important;
+}
+.admin-degree-field .admin-degree-selection {
+  flex: 1;
+  min-width: 0;
   color: var(--ink);
   font-size: inherit;
   font-weight: 600;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 .admin-degree-popover {
   width: min(29rem, calc(100vw - 2rem));
+  min-width: 0;
+  max-width: calc(100vw - 2rem);
   max-height: min(24rem, calc(100dvh - 4rem));
   overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: white;
+  box-shadow: 0 8px 24px rgb(23 33 38 / 12%);
+}
+.admin-degree-option {
+  flex: 1;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.admin-degree-checkboxes {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.5rem;
+  color: var(--ink);
+  font: inherit;
+}
+.admin-degree-checkbox {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: 0.65rem;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.5rem;
+  color: var(--ink);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.admin-degree-popover .admin-degree-checkbox input[type="checkbox"] {
+  flex: none;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.2rem;
+  accent-color: var(--maroon-700);
+}
+.admin-degree-checkbox:focus-within {
+  outline: 2px solid var(--maroon-700);
+  outline-offset: -2px;
+}
+.admin-degree-select-all {
+  border-bottom: 1px solid #cfc7bb;
+  font-weight: 600;
 }
 .admin-form textarea {
   resize: vertical;
@@ -3618,6 +3790,20 @@ select:focus-visible {
 .admin-list-row p {
   margin: 0.25rem 0 0;
   color: var(--muted);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.admin-list-row > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.admin-console :is(button, .checkbox-label),
+.admin-program-editor-page :is(button, .checkbox-label) {
+  min-height: 44px;
+}
+.admin-form textarea:focus-visible {
+  outline: 2px solid var(--maroon-700);
+  outline-offset: 3px;
 }
 .admin-login-shell {
   max-width: 560px;
@@ -3955,7 +4141,13 @@ select:focus-visible {
   .admin-program-table thead,
   .admin-cycle-table thead,
   .admin-audit-table thead {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
   .admin-program-table tr,
   .admin-cycle-table tr,
