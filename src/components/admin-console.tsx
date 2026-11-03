@@ -919,17 +919,13 @@ function AnnouncementForm({
         />
       </label>
       <label>
-        Summary
-        <textarea
-          name="summary"
-          required
-          rows={3}
-          defaultValue={value(announcement ?? {}, "summary")}
-        />
-      </label>
-      <label>
         Content
-        <textarea name="body" rows={6} defaultValue={value(announcement ?? {}, "body")} />
+        <textarea
+          name="body"
+          required
+          rows={8}
+          defaultValue={value(announcement ?? {}, "body")}
+        />
       </label>
       <div className="admin-form-grid">
         <label>
@@ -1710,7 +1706,7 @@ export function AdminConsole({
             <article className="admin-list-row" key={value(announcement, "id")}>
               <div>
                 <strong>{value(announcement, "title")}</strong>
-                <p>{value(announcement, "summary")}</p>
+                {value(announcement, "body") ? <p>{value(announcement, "body")}</p> : null}
                 <small className="admin-list-meta">
                   Updated {adminDate(announcement.updated_at)}
                   {announcement.pinned ? " · Pinned" : ""}

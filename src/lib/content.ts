@@ -12,7 +12,6 @@ import {
 export interface Announcement {
   id: string;
   title: string;
-  summary: string;
   body?: string;
   pinned: boolean;
   publishedAt: string;
@@ -148,23 +147,24 @@ async function getCachedPublicAnnouncements(): Promise<Announcement[]> {
   cacheLife("minutes");
   cacheTag("public-announcements");
   const rows = (await getNeonSql().query(
-      `select id, title, summary, body, pinned, published_at, scheduled_at from announcements where publication_status = 'published' and archived_at is null and (scheduled_at is null or scheduled_at <= now()) order by pinned desc, coalesce(published_at, created_at) desc`,
+      `select id, title, coalesce(nullif(body, ''), summary) as body, pinned, published_at, scheduled_at from announcements where publication_status = 'published' and archived_at is null and (scheduled_at is null or scheduled_at <= now()) order by pinned desc, coalesce(published_at, created_at) desc`,
     )) as unknown as {
       id: string;
       title: string;
-      summary: string;
       body: string | null;
       pinned: boolean;
-      published_at: string;
+      published_at: string | Date | null;
       scheduled_at: string | null;
     }[];
   return rows.map((row) => ({
         id: row.id,
         title: row.title,
-        summary: row.summary,
         body: row.body ?? undefined,
         pinned: row.pinned,
-        publishedAt: row.published_at,
+        publishedAt:
+          row.published_at instanceof Date
+            ? row.published_at.toISOString()
+            : row.published_at ?? "",
       }));
 }
 

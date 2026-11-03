@@ -1,20 +1,29 @@
 import { SectionHeading } from "@/src/components/section-heading";
 import Link from "next/link";
+import { cacheLife } from "next/cache";
 import { getPublicAnnouncementsResult, getPublicProgramsResult } from "@/src/lib/content";
 import { EmptyState, ErrorState } from "@/src/components/data-states";
 import { ServiceCarousel } from "@/src/components/service-carousel";
 import { HeroActions } from "@/src/components/hero-actions";
 import { FeaturedOpportunities } from "@/src/components/featured-opportunities";
 import { HomeScrollMotion } from "@/src/components/home-scroll-motion";
+import { AnnouncementAlert } from "@/src/components/announcement-alert";
 import { services } from "@/src/types/domain";
 
 export const instant = false;
+
+async function getPageTimeSnapshot() {
+  "use cache";
+  cacheLife("minutes");
+  return new Date();
+}
 
 export default async function HomePage() {
   const [programResult, announcementResult] = await Promise.all([
     getPublicProgramsResult(),
     getPublicAnnouncementsResult(),
   ]);
+  const pageTime = await getPageTimeSnapshot();
   const featuredPrograms = programResult.data
     .filter((program) => program.serviceSlug === "scholarships")
     .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""))
@@ -48,28 +57,9 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-      {announcementResult.status === "error" || announcementResult.data.length > 0 ? (
-        <section className="section announcement-section">
-          <div className="container">
-            <SectionHeading title="What’s new from OSA-SFAU" />
-            {announcementResult.status === "error" ? (
-              <ErrorState />
-            ) : (
-              <div className="announcement-list">
-                {announcementResult.data.map((announcement) => (
-                  <article className="announcement-row" key={announcement.id}>
-                    <div>
-                      <h3>{announcement.title}</h3>
-                      <p>{announcement.summary}</p>
-                    </div>
-                    <span>{announcement.publishedAt}</span>
-                  </article>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-      ) : null}
+      <AnnouncementAlert
+        announcements={announcementResult.data}
+      />
       <section className="section">
         <div className="container">
           <SectionHeading title="Find the right kind of support" />
@@ -91,7 +81,7 @@ export default async function HomePage() {
                 message="Verified scholarship information will appear here when published."
               />
             ) : (
-              <FeaturedOpportunities programs={featuredPrograms} />
+              <FeaturedOpportunities programs={featuredPrograms} today={pageTime} />
             )}
           </div>
         </div>

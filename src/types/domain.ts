@@ -106,9 +106,8 @@ export const undergraduateDegreePrograms = [
 export function getProgramCategories(program: Program): ScholarshipCategory[] {
   return Array.from(new Set([program.category, ...(program.categories ?? [])]));
 }
-export function getPrimaryCycle(program: Program): ApplicationCycle | undefined {
+export function getPrimaryCycle(program: Program, now = new Date()): ApplicationCycle | undefined {
   const cycles = program.cycles ?? [];
-  const now = new Date();
   const open = cycles.find((cycle) => resolveApplicationAvailability(cycle, now) === "open");
   if (open) return open;
   const upcoming = cycles

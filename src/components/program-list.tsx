@@ -9,7 +9,7 @@ export function ProgramList({ programs, today }: { programs: Program[]; today?: 
   return (
     <ul className="program-list-group">
       {programs.map((program) => {
-        const cycle = getPrimaryCycle(program);
+        const cycle = getPrimaryCycle(program, today);
         return (
           <li key={program.id}>
             <ProgramDetailsLink program={program} className="program-list-row">

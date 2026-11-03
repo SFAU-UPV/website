@@ -1155,8 +1155,83 @@ select:focus-visible {
   font-size: 0.9rem;
   font-weight: 600;
 }
-.announcement-section {
-  background: #f5f1eb;
+.announcement-dialog {
+  width: min(42rem, calc(100vw - 2rem));
+  max-height: min(80vh, 44rem);
+  margin: auto;
+  padding: clamp(1.25rem, 4vw, 2rem);
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: 0 22px 60px rgba(23, 33, 38, 0.28);
+}
+.announcement-dialog::backdrop {
+  background: rgba(23, 33, 38, 0.58);
+}
+.announcement-dialog h2 {
+  margin: 0 0 1.25rem;
+  color: var(--maroon-900);
+  font: 700 1.45rem/1.25 var(--font-sans);
+}
+.announcement-dialog .announcement-list {
+  display: grid;
+  gap: 1rem;
+}
+.announcement-dialog .announcement-row,
+.announcement-dialog .announcement-row:first-child {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 0 0;
+  border: 0;
+  border-top: 1px solid rgba(101, 11, 18, 0.16);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.announcement-dialog .announcement-row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.announcement-dialog .announcement-row > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.announcement-dialog .announcement-row > span {
+  color: var(--muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.announcement-dialog .announcement-row > time {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.announcement-dialog .announcement-row p {
+  white-space: pre-wrap;
+}
+.announcement-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+.announcement-dialog .button:focus-visible {
+  outline: 2px solid var(--maroon-900);
+  outline-offset: 3px;
+}
+@media (max-width: 720px) {
+  .announcement-dialog {
+    max-height: calc(100dvh - 2rem);
+    padding: 1.1rem;
+  }
+  .announcement-dialog .announcement-row {
+    flex-direction: column;
+    gap: 0.45rem;
+  }
 }
 .callout {
   margin-top: 1.5rem;

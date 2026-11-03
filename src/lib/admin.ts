@@ -131,7 +131,7 @@ export async function getAdminSnapshot() {
       "select p.*, sc.slug as service_slug, sc.name as service_name, coalesce(array_agg(distinct sh.slug) filter (where sh.slug is not null), '{}') as category_slugs, coalesce(jsonb_agg(distinct ac) filter (where ac.id is not null), '[]') as application_cycles from programs p left join service_categories sc on sc.id=p.service_category_id left join program_category_links pcl on pcl.program_id=p.id left join scholarship_categories sh on sh.id=pcl.category_id left join application_cycles ac on ac.program_id=p.id and ac.archived_at is null group by p.id, sc.slug, sc.name order by p.updated_at desc",
     ),
     sql.query(
-      "select id,title,summary,body,publication_status,published_at,scheduled_at,pinned,updated_at,archived_at from announcements order by updated_at desc",
+      "select id,title,coalesce(nullif(body,''),summary) as body,publication_status,published_at,scheduled_at,pinned,updated_at,archived_at from announcements order by updated_at desc",
     ),
     sql.query("select id,slug,name from service_categories order by name"),
     sql.query("select id,slug,name from scholarship_categories order by name"),
@@ -418,25 +418,25 @@ export async function saveAnnouncementAction(form: FormData): Promise<AdminActio
     const { sql, user } = await requireAdmin();
     const id = text(form, "id"),
       title = text(form, "title"),
-      summary = text(form, "summary");
-    if (!title || !summary) throw new Error("Title and summary are required.");
+      body = sanitize(text(form, "body"));
+    if (!title || !body) throw new Error("Title and content are required.");
     const values = [
       title,
-      summary,
-      nullable(sanitize(text(form, "body"))),
+      "",
+      body,
       text(form, "publication_status") || "draft",
       form.get("pinned") === "on",
     ];
     const row = id
       ? (
           await sql.query(
-            "update announcements set title=$1,summary=$2,body=$3,publication_status=$4,pinned=$5,updated_at=now() where id=$6 returning *",
+            "update announcements set title=$1,summary=$2,body=$3,publication_status=$4,published_at=case when $4::publication_status='published' then now() else published_at end,pinned=$5,updated_at=now() where id=$6 returning *",
             [...values, id],
           )
         )[0]
       : (
           await sql.query(
-            "insert into announcements (title,summary,body,publication_status,pinned) values ($1,$2,$3,$4,$5) returning *",
+            "insert into announcements (title,summary,body,publication_status,pinned,published_at) values ($1,$2,$3,$4,$5,case when $4::publication_status='published' then now() else null end) returning *",
             values,
           )
         )[0];
@@ -477,7 +477,7 @@ export async function changeAnnouncementStateAction(form: FormData): Promise<Adm
     if (!before) throw new Error("Announcement not found.");
     const after = (
       await sql.query(
-        "update announcements set publication_status=$1::publication_status, archived_at=case when $1::publication_status='archived' then coalesce(archived_at, now()) else null end, published_at=case when $1::publication_status='published' then coalesce(published_at, now()) else published_at end, updated_at=now() where id=$2 returning id,title,publication_status,archived_at,published_at",
+        "update announcements set publication_status=$1::publication_status, archived_at=case when $1::publication_status='archived' then coalesce(archived_at, now()) else null end, published_at=case when $1::publication_status='published' then now() else published_at end, updated_at=now() where id=$2 returning id,title,publication_status,archived_at,published_at",
         [next, id],
       )
     )[0];
